@@ -49,21 +49,42 @@ def create_inventory_item(payload: InventoryItemCreate):
 @router.get("", response_model=ApiResponse[List[InventoryItemResponse]], summary="List all inventory items")
 def list_inventory():
     items = repo.list_all()
-    res = [
-        InventoryItemResponse(
-            id=item["id"],
-            name=item["name"],
-            category=item["category"],
-            current_quantity=item["current_quantity"],
-            unit=item["unit"],
-            min_threshold=item["min_threshold"],
-            unit_cost=item.get("unit_cost", 0.0),
-            is_low_stock=item.get("current_quantity", 0) <= item.get("min_threshold", 0),
-            is_deleted=item.get("is_deleted", False),
-            created_at=datetime.fromisoformat(item["created_at"].replace("Z", "+00:00")),
-            updated_at=datetime.fromisoformat(item["updated_at"].replace("Z", "+00:00"))
-        ) for item in items if not item.get("is_deleted")
-    ]
+    now_dt = datetime.now(timezone.utc)
+    res = []
+    for item in items:
+        if item.get("is_deleted", False):
+            continue
+        
+        qty = float(item.get("current_quantity") if item.get("current_quantity") is not None else item.get("stockQty", 0.0))
+        thresh = float(item.get("min_threshold") if item.get("min_threshold") is not None else item.get("minThreshold", 10.0))
+        
+        created_at = now_dt
+        if item.get("created_at"):
+            try:
+                created_at = datetime.fromisoformat(str(item["created_at"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+        updated_at = now_dt
+        if item.get("updated_at"):
+            try:
+                updated_at = datetime.fromisoformat(str(item["updated_at"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+        res.append(InventoryItemResponse(
+            id=str(item.get("id", "inv_unk")),
+            name=str(item.get("name", "Item")),
+            category=str(item.get("category", "General")),
+            current_quantity=qty,
+            unit=str(item.get("unit", "pcs")),
+            min_threshold=thresh,
+            unit_cost=float(item.get("unit_cost", 0.0)),
+            is_low_stock=qty <= thresh,
+            is_deleted=False,
+            created_at=created_at,
+            updated_at=updated_at
+        ))
     return ApiResponse.ok(data=res, message="Inventory items retrieved")
 
 @router.put("/{item_id}", response_model=ApiResponse[InventoryItemResponse], summary="Update inventory item stock")
@@ -73,32 +94,37 @@ def update_inventory_item(payload: InventoryItemUpdate, item_id: str = Path(...,
         raise EntityNotFoundException("Inventory Item", item_id)
 
     update_dict = payload.model_dump(exclude_unset=True)
-    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
-    
-    new_qty = update_dict.get("current_quantity", item["current_quantity"])
-    new_thresh = update_dict.get("min_threshold", item["min_threshold"])
-    update_dict["is_low_stock"] = new_qty <= new_thresh
+    if "current_quantity" in update_dict or "min_threshold" in update_dict:
+        new_qty = update_dict.get("current_quantity", item.get("current_quantity", item.get("stockQty", 0.0)))
+        new_thresh = update_dict.get("min_threshold", item.get("min_threshold", item.get("minThreshold", 10.0)))
+        update_dict["is_low_stock"] = new_qty <= new_thresh
 
+    now_str = datetime.now(timezone.utc).isoformat()
+    update_dict["updated_at"] = now_str
     updated = repo.update(item_id, update_dict)
+
+    qty = float(updated.get("current_quantity") if updated.get("current_quantity") is not None else updated.get("stockQty", 0.0))
+    thresh = float(updated.get("min_threshold") if updated.get("min_threshold") is not None else updated.get("minThreshold", 10.0))
+
     res = InventoryItemResponse(
         id=item_id,
-        name=updated["name"],
-        category=updated["category"],
-        current_quantity=updated["current_quantity"],
-        unit=updated["unit"],
-        min_threshold=updated["min_threshold"],
-        unit_cost=updated.get("unit_cost", 0.0),
-        is_low_stock=updated.get("is_low_stock", False),
-        is_deleted=updated.get("is_deleted", False),
-        created_at=datetime.fromisoformat(updated["created_at"].replace("Z", "+00:00")),
-        updated_at=datetime.fromisoformat(updated["updated_at"].replace("Z", "+00:00"))
+        name=str(updated.get("name", item.get("name", "Item"))),
+        category=str(updated.get("category", item.get("category", "General"))),
+        current_quantity=qty,
+        unit=str(updated.get("unit", item.get("unit", "pcs"))),
+        min_threshold=thresh,
+        unit_cost=float(updated.get("unit_cost", 0.0)),
+        is_low_stock=qty <= thresh,
+        is_deleted=False,
+        created_at=datetime.fromisoformat(str(updated.get("created_at", now_str)).replace("Z", "+00:00")),
+        updated_at=datetime.fromisoformat(now_str.replace("Z", "+00:00"))
     )
-    return ApiResponse.ok(data=res, message="Inventory item updated successfully")
+    return ApiResponse.ok(data=res, message="Inventory stock updated successfully")
 
-@router.delete("/{item_id}", response_model=ApiResponse[dict], summary="Soft delete inventory item")
+@router.delete("/{item_id}", response_model=ApiResponse[dict], summary="Delete inventory item")
 def delete_inventory_item(item_id: str = Path(..., description="Inventory Item ID")):
     item = repo.get_by_id(item_id)
     if not item or item.get("is_deleted"):
         raise EntityNotFoundException("Inventory Item", item_id)
     repo.update(item_id, {"is_deleted": True, "updated_at": datetime.now(timezone.utc).isoformat()})
-    return ApiResponse.ok(data={"id": item_id, "is_deleted": True}, message="Inventory item deleted")
+    return ApiResponse.ok(data={"item_id": item_id, "is_deleted": True}, message="Inventory item deleted successfully")

@@ -69,14 +69,38 @@ class CustomerService:
         return self._to_response(updated)
 
     def _to_response(self, d: Dict[str, Any]) -> CustomerResponse:
+        now_dt = datetime.now(timezone.utc)
+        
+        raw_status = str(d.get("status", "active")).lower()
+        if raw_status in ["withdrawn", "inactive"]:
+            status_enum = CustomerStatus.PAUSED
+        elif raw_status == "archived":
+            status_enum = CustomerStatus.ARCHIVED
+        else:
+            status_enum = CustomerStatus.ACTIVE
+
+        created_at = now_dt
+        if d.get("created_at"):
+            try:
+                created_at = datetime.fromisoformat(str(d["created_at"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+        updated_at = now_dt
+        if d.get("updated_at"):
+            try:
+                updated_at = datetime.fromisoformat(str(d["updated_at"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+
         return CustomerResponse(
-            id=d["id"],
-            name=d["name"],
-            phone=d["phone"],
-            address=d["address"],
+            id=d.get("id", "cust_unknown"),
+            name=d.get("name", "Unnamed Customer"),
+            phone=d.get("phone", "N/A"),
+            address=d.get("address", "N/A"),
             landmark=d.get("landmark"),
-            status=CustomerStatus(d["status"]),
+            status=status_enum,
             is_deleted=d.get("is_deleted", False),
-            created_at=datetime.fromisoformat(d["created_at"].replace("Z", "+00:00")),
-            updated_at=datetime.fromisoformat(d["updated_at"].replace("Z", "+00:00"))
+            created_at=created_at,
+            updated_at=updated_at
         )

@@ -43,20 +43,35 @@ def create_expense(payload: ExpenseCreate):
 @router.get("", response_model=ApiResponse[List[ExpenseResponse]], summary="List recorded expenses")
 def list_expenses():
     """
-    Retrieves all active operational expenses.
+    Retrieves all active operational expenses (supporting both legacy & new Firestore formats).
     """
     records = repo.list_all()
-    res = [
-        ExpenseResponse(
-            id=r["id"],
-            date=date.fromisoformat(r["date"]),
-            category=r["category"],
-            amount=r["amount"],
-            description=r["description"],
+    now_dt = datetime.now(timezone.utc)
+    res = []
+    for r in records:
+        if r.get("is_deleted", False):
+            continue
+        try:
+            exp_date = date.fromisoformat(str(r["date"])) if r.get("date") else date.today()
+        except Exception:
+            exp_date = date.today()
+        
+        created_at = now_dt
+        if r.get("created_at"):
+            try:
+                created_at = datetime.fromisoformat(str(r["created_at"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+        res.append(ExpenseResponse(
+            id=str(r.get("id", "exp_unk")),
+            date=exp_date,
+            category=str(r.get("category", "groceries")).lower(),
+            amount=float(r.get("amount", 0.0)),
+            description=str(r.get("description") or r.get("item") or "Expense"),
             paid_to=r.get("paid_to"),
-            created_at=datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
-        ) for r in records if not r.get("is_deleted", False)
-    ]
+            created_at=created_at
+        ))
     return ApiResponse.ok(data=res, message="Expenses retrieved")
 
 @router.put("/{expense_id}", response_model=ApiResponse[ExpenseResponse], summary="Update operational expense")
@@ -85,7 +100,7 @@ def update_expense(payload: ExpenseCreate, expense_id: str = Path(..., descripti
         amount=payload.amount,
         description=payload.description,
         paid_to=payload.paid_to,
-        created_at=datetime.fromisoformat(updated["created_at"].replace("Z", "+00:00"))
+        created_at=datetime.fromisoformat(str(updated.get("created_at", now_str)).replace("Z", "+00:00"))
     )
     return ApiResponse.ok(data=res, message="Expense updated successfully")
 
