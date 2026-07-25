@@ -29,12 +29,16 @@ class DeliveryEngine:
         global_s = self.settings_service.get_settings()
         is_sunday = target_date.weekday() == 6
 
+        # Batch fetch active customers in ONE network call instead of N calls inside the loop
+        active_custs = self.cust_repo.get_active_customers()
+        cust_map = {c["id"]: c for c in active_custs}
+
         for sub in active_subs:
             sub_start = date.fromisoformat(sub["start_date"])
             sub_end = date.fromisoformat(sub["end_date"])
 
             if sub_start <= target_date <= sub_end and sub["customer_id"] not in existing_cust_ids:
-                cust = self.cust_repo.get_by_id(sub["customer_id"])
+                cust = cust_map.get(sub["customer_id"])
                 if not cust or cust.get("is_deleted") or cust.get("status") != "active":
                     continue
 
