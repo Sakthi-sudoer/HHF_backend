@@ -1,0 +1,26 @@
+/* Custom Scrollbars & Theme Transitions */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+.custom-shadow {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.invoice-sheet {
+  background: white;
+  color: #0f172a;
+  padding: 2rem;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+}
