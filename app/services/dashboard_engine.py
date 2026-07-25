@@ -9,11 +9,12 @@ from app.repositories.customer_repository import CustomerRepository
 from app.repositories.payment_repository import PaymentRepository
 from app.repositories.expense_repository import ExpenseRepository
 from app.repositories.invoice_repository import InvoiceRepository
-from app.services.delivery_engine import DeliveryEngine
+from app.repositories.subscription_repository import SubscriptionRepository
+from app.services.settings_service import SettingsService
 
-# Ultra-fast 5-second TTL Cache for Dashboard
+# Fast 10-second TTL Cache for Dashboard queries
 _DASHBOARD_CACHE: Dict[str, Any] = {}
-_DASHBOARD_CACHE_TTL = 5  # seconds
+_DASHBOARD_CACHE_TTL = 10  # seconds
 
 class DashboardEngine:
     def __init__(self):
@@ -22,7 +23,8 @@ class DashboardEngine:
         self.payment_repo = PaymentRepository()
         self.expense_repo = ExpenseRepository()
         self.invoice_repo = InvoiceRepository()
-        self.delivery_engine = DeliveryEngine()
+        self.sub_repo = SubscriptionRepository()
+        self.settings_service = SettingsService()
 
     def get_dashboard_summary(
         self, 
@@ -39,30 +41,60 @@ class DashboardEngine:
                 return cached_data
 
         today_d = date.today()
+        today_str = today_d.isoformat()
         
-        # 1. Operational Stats for Today (Using Batch Customer Lookup)
-        daily_records = self.delivery_engine.get_daily_sheet(today_d)
+        # 1. Operational Stats for Today (Fast in-memory aggregation without blocking writes)
+        active_subs = self.sub_repo.get_all_active_subscriptions()
+        existing_today_deliveries = self.delivery_repo.get_by_date(today_str)
+        existing_deliv_map = {d["customer_id"]: d for d in existing_today_deliveries}
+
+        global_s = self.settings_service.get_settings()
+        is_sunday = today_d.weekday() == 6
+        is_delivery_day = not (is_sunday and global_s.sunday_holiday_enabled)
 
         b_veg, b_non, l_veg, l_non, d_veg, d_non = 0, 0, 0, 0, 0, 0
 
-        for r in daily_records:
-            if r.breakfast.delivered:
-                if r.breakfast.preference.value == "veg":
-                    b_veg += 1
-                else:
-                    b_non += 1
+        for sub in active_subs:
+            sub_start = date.fromisoformat(sub["start_date"])
+            sub_end = date.fromisoformat(sub["end_date"])
 
-            if r.lunch.delivered:
-                if r.lunch.preference.value == "veg":
-                    l_veg += 1
-                else:
-                    l_non += 1
-
-            if r.dinner.delivered:
-                if r.dinner.preference.value == "veg":
-                    d_veg += 1
-                else:
-                    d_non += 1
+            if sub_start <= today_d <= sub_end:
+                c_id = sub["customer_id"]
+                if c_id in existing_deliv_map:
+                    deliv = existing_deliv_map[c_id]
+                    if deliv.get("breakfast", {}).get("delivered"):
+                        if deliv.get("breakfast", {}).get("preference") == "veg":
+                            b_veg += 1
+                        else:
+                            b_non += 1
+                    if deliv.get("lunch", {}).get("delivered"):
+                        if deliv.get("lunch", {}).get("preference") == "veg":
+                            l_veg += 1
+                        else:
+                            l_non += 1
+                    if deliv.get("dinner", {}).get("delivered"):
+                        if deliv.get("dinner", {}).get("preference") == "veg":
+                            d_veg += 1
+                        else:
+                            d_non += 1
+                elif is_delivery_day:
+                    meals_cfg = sub["meals"]
+                    prefs_cfg = sub["preferences"]
+                    if meals_cfg.get("breakfast"):
+                        if prefs_cfg.get("breakfast") == "veg":
+                            b_veg += 1
+                        else:
+                            b_non += 1
+                    if meals_cfg.get("lunch"):
+                        if prefs_cfg.get("lunch") == "veg":
+                            l_veg += 1
+                        else:
+                            l_non += 1
+                    if meals_cfg.get("dinner"):
+                        if prefs_cfg.get("dinner") == "veg":
+                            d_veg += 1
+                        else:
+                            d_non += 1
 
         b_stats = MealTypeStats(veg=b_veg, non_veg=b_non, total=b_veg + b_non)
         l_stats = MealTypeStats(veg=l_veg, non_veg=l_non, total=l_veg + l_non)
@@ -93,20 +125,18 @@ class DashboardEngine:
 
         p_start_str, p_end_str = p_start.isoformat(), p_end.isoformat()
 
-        # Batch fetch all collections in parallel/bulk (4 single network calls total)
+        # Bulk fetch collections (4 single network calls total)
         all_payments = self.payment_repo.list_all()
         all_expenses = self.expense_repo.list_all()
         all_invoices = self.invoice_repo.list_all()
         active_custs = self.cust_repo.get_active_customers()
         active_cust_ids = {c["id"] for c in active_custs}
 
-        # Collection in period
+        # Collections & Expenses in period
         period_collections = sum(
             p.get("amount", 0.0) for p in all_payments 
             if p_start_str <= p.get("payment_date", "") <= p_end_str
         )
-
-        # Expenses in period
         period_expenses = sum(
             e.get("amount", 0.0) for e in all_expenses 
             if p_start_str <= e.get("date", "") <= p_end_str
@@ -119,7 +149,7 @@ class DashboardEngine:
             for inv in all_invoices if p_start_str <= inv.get("billing_date", "") <= p_end_str
         )
 
-        # FAST IN-MEMORY PENDING BALANCE VECTOR CALCULATION (0 sub-queries!)
+        # FAST IN-MEMORY PENDING BALANCE CALCULATION
         cust_invoiced: Dict[str, float] = {}
         for inv in all_invoices:
             c_id = inv.get("customer_id")

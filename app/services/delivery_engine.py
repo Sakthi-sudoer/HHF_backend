@@ -29,7 +29,7 @@ class DeliveryEngine:
         global_s = self.settings_service.get_settings()
         is_sunday = target_date.weekday() == 6
 
-        # Batch fetch active customers in ONE network call instead of N calls inside the loop
+        # Batch fetch active customers in ONE network call
         active_custs = self.cust_repo.get_active_customers()
         cust_map = {c["id"]: c for c in active_custs}
 
