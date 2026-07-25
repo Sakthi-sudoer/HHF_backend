@@ -46,6 +46,7 @@ function switchTab(tabId) {
     loadCustomerData();
   } else if (tabId === "subscriptions") {
     loadCustomerData().then(populateSubscriptionCustomerDropdown);
+    if (typeof loadExpiringSubscriptions === 'function') loadExpiringSubscriptions();
   } else if (tabId === "deliveries") {
     loadDeliverySheet();
   } else if (tabId === "payments") {
@@ -54,6 +55,8 @@ function switchTab(tabId) {
     loadExpensesData();
   } else if (tabId === "inventory") {
     loadInventoryData();
+  } else if (tabId === "reports") {
+    if (typeof loadReportsData === 'function') loadReportsData();
   } else if (tabId === "settings") {
     loadSettingsData();
   }

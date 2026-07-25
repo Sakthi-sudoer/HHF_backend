@@ -13,9 +13,8 @@ from app.repositories.invoice_repository import InvoiceRepository
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.services.settings_service import SettingsService
 
-# Ultra-fast TTL Cache for Dashboard (60 seconds for instant load)
 _DASHBOARD_CACHE: Dict[str, Any] = {}
-_DASHBOARD_CACHE_TTL = 60  # seconds
+_DASHBOARD_CACHE_TTL = 30  # 30s TTL for fast loading
 
 class DashboardEngine:
     def __init__(self):
@@ -43,8 +42,9 @@ class DashboardEngine:
 
         today_d = date.today()
         today_str = today_d.isoformat()
+        month_start_str = today_d.replace(day=1).isoformat()
 
-        # Execute all Firestore queries in parallel using ThreadPoolExecutor
+        # Parallel Firestore queries
         with ThreadPoolExecutor(max_workers=6) as executor:
             fut_subs = executor.submit(self.sub_repo.get_all_active_subscriptions)
             fut_delivs = executor.submit(self.delivery_repo.get_by_date, today_str)
@@ -69,8 +69,11 @@ class DashboardEngine:
         b_veg, b_non, l_veg, l_non, d_veg, d_non = 0, 0, 0, 0, 0, 0
 
         for sub in active_subs:
-            sub_start = date.fromisoformat(sub["start_date"])
-            sub_end = date.fromisoformat(sub["end_date"])
+            try:
+                sub_start = date.fromisoformat(str(sub["start_date"]))
+                sub_end = date.fromisoformat(str(sub["end_date"]))
+            except Exception:
+                continue
 
             if sub_start <= today_d <= sub_end:
                 c_id = sub["customer_id"]
@@ -92,8 +95,8 @@ class DashboardEngine:
                         else:
                             d_non += 1
                 elif is_delivery_day:
-                    meals_cfg = sub["meals"]
-                    prefs_cfg = sub["preferences"]
+                    meals_cfg = sub.get("meals", {"breakfast": True, "lunch": True, "dinner": True})
+                    prefs_cfg = sub.get("preferences", {"breakfast": "veg", "lunch": "veg", "dinner": "veg"})
                     if meals_cfg.get("breakfast"):
                         if prefs_cfg.get("breakfast") == "veg":
                             b_veg += 1
@@ -113,52 +116,38 @@ class DashboardEngine:
         b_stats = MealTypeStats(veg=b_veg, non_veg=b_non, total=b_veg + b_non)
         l_stats = MealTypeStats(veg=l_veg, non_veg=l_non, total=l_veg + l_non)
         d_stats = MealTypeStats(veg=d_veg, non_veg=d_non, total=d_veg + d_non)
-        total_m = b_stats.total + l_stats.total + d_stats.total
 
         ops = OperationsTodayStats(
             date=today_d,
             breakfast=b_stats,
             lunch=l_stats,
             dinner=d_stats,
-            total_meals=total_m
+            total_meals=b_stats.total + l_stats.total + d_stats.total
         )
-
-        # 2. Financial Date Range Resolver
-        if period == "today":
-            p_start, p_end = today_d, today_d
-        elif period == "this_week":
-            p_start = today_d - timedelta(days=today_d.weekday())
-            p_end = today_d
-        elif period == "this_month":
-            p_start = today_d.replace(day=1)
-            p_end = today_d
-        elif period == "custom" and start_date and end_date:
-            p_start, p_end = start_date, end_date
-        else:
-            p_start, p_end = today_d, today_d
-
-        p_start_str, p_end_str = p_start.isoformat(), p_end.isoformat()
 
         active_cust_ids = {c["id"] for c in active_custs}
 
-        # Collections & Expenses in period
-        period_collections = sum(
-            p.get("amount", 0.0) for p in all_payments 
-            if p_start_str <= p.get("payment_date", "") <= p_end_str
-        )
-        period_expenses = sum(
-            e.get("amount", 0.0) for e in all_expenses 
-            if p_start_str <= e.get("date", "") <= p_end_str
+        # Calculations
+        today_coll = sum(float(p.get("amount", 0.0)) for p in all_payments if p.get("payment_date") == today_str)
+        month_coll = sum(float(p.get("amount", 0.0)) for p in all_payments if p.get("payment_date", "") >= month_start_str)
+        today_pay_count = sum(1 for p in all_payments if p.get("payment_date") == today_str)
+
+        today_invs = [i for i in all_invoices if i.get("billing_date") == today_str]
+        today_inv_count = len(today_invs)
+        today_inv_amt = sum(
+            (i.get("cancellation_summary", {}).get("final_adjusted_invoice_total") 
+             if i.get("cancellation_summary") else i.get("breakdown", {}).get("net_amount", 0.0))
+            for i in today_invs
         )
 
-        # Revenue in period
-        period_revenue = sum(
-            (inv.get("cancellation_summary", {}).get("final_adjusted_invoice_total") 
-             if inv.get("cancellation_summary") else inv.get("breakdown", {}).get("net_amount", 0.0))
-            for inv in all_invoices if p_start_str <= inv.get("billing_date", "") <= p_end_str
+        month_rev = sum(
+            (i.get("cancellation_summary", {}).get("final_adjusted_invoice_total") 
+             if i.get("cancellation_summary") else i.get("breakdown", {}).get("net_amount", 0.0))
+            for i in all_invoices if i.get("billing_date", "") >= month_start_str
         )
+        month_exp = sum(float(e.get("amount", 0.0)) for e in all_expenses if e.get("date", "") >= month_start_str and not e.get("is_deleted"))
 
-        # FAST IN-MEMORY PENDING BALANCE CALCULATION
+        # Outstanding balances calculation
         cust_invoiced: Dict[str, float] = {}
         for inv in all_invoices:
             c_id = inv.get("customer_id")
@@ -171,23 +160,42 @@ class DashboardEngine:
         for p in all_payments:
             c_id = p.get("customer_id")
             if c_id in active_cust_ids:
-                cust_paid[c_id] = cust_paid.get(c_id, 0.0) + p.get("amount", 0.0)
+                cust_paid[c_id] = cust_paid.get(c_id, 0.0) + float(p.get("amount", 0.0))
 
-        total_pending = 0.0
+        tot_out = 0.0
         for c_id in active_cust_ids:
             bal = cust_invoiced.get(c_id, 0.0) - cust_paid.get(c_id, 0.0)
             if bal > 0:
-                total_pending += bal
+                tot_out += bal
 
-        profit = round(period_revenue - period_expenses, 2)
+        expiring_cnt = 0
+        for sub in active_subs:
+            try:
+                e_d = date.fromisoformat(str(sub["end_date"]))
+                if 0 <= (e_d - today_d).days <= 7:
+                    expiring_cnt += 1
+            except Exception:
+                pass
+
+        month_prof = round(month_rev - month_exp, 2)
 
         financials = FinancialCardsStats(
             period=period,
-            todays_collection=round(period_collections, 2),
-            pending_amount=round(total_pending, 2),
-            todays_revenue=round(period_revenue, 2),
-            total_expenses=round(period_expenses, 2),
-            profit=profit
+            todays_collection=round(today_coll, 2),
+            monthly_collection=round(month_coll, 2),
+            pending_collection=round(tot_out, 2),
+            total_outstanding=round(tot_out, 2),
+            pending_amount=round(tot_out, 2),
+            today_new_invoices_count=today_inv_count,
+            today_new_invoices_amount=round(today_inv_amt, 2),
+            today_payments_count=today_pay_count,
+            monthly_revenue=round(month_rev, 2),
+            monthly_profit=month_prof,
+            todays_revenue=round(month_rev, 2),
+            total_expenses=round(month_exp, 2),
+            profit=month_prof,
+            active_subscriptions_count=len(active_subs),
+            expiring_subscriptions_count=expiring_cnt
         )
 
         paused_custs = [c for c in active_custs if c.get("status") == "paused"]
@@ -199,7 +207,6 @@ class DashboardEngine:
             paused_customers_count=len(paused_custs)
         )
 
-        # Save to fast TTL cache
         _DASHBOARD_CACHE[cache_key] = (response, time.time())
         return response
 

@@ -23,6 +23,12 @@ const api = {
   cancelSubscription: async (id) => {
     return await axios.delete(`${getApiBase()}/subscriptions/${id}`);
   },
+  getExpiringSubscriptions: async (thresholdDays = 7) => {
+    return await axios.get(`${getApiBase()}/subscriptions/expiring?threshold_days=${thresholdDays}`);
+  },
+  renewSubscription: async (id) => {
+    return await axios.post(`${getApiBase()}/subscriptions/${id}/renew`);
+  },
 
   getDeliverySheet: async (targetDate) => {
     return await axios.get(`${getApiBase()}/deliveries/sheet?target_date=${targetDate}`);
@@ -65,5 +71,20 @@ const api = {
   },
   deleteInventoryItem: async (id) => {
     return await axios.delete(`${getApiBase()}/inventory/${id}`);
+  },
+
+  getReports: async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return await axios.get(`${getApiBase()}/reports?${query}`);
+  },
+  exportReportsCSV: () => {
+    window.open(`${getApiBase()}/reports/export/csv`, '_blank');
+  },
+
+  getSettings: async () => {
+    return await axios.get(`${getApiBase()}/settings`);
+  },
+  updateSettings: async (payload) => {
+    return await axios.put(`${getApiBase()}/settings`, payload);
   }
 };

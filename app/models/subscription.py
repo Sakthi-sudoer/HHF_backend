@@ -51,6 +51,12 @@ class SubscriptionResponse(BaseModel):
     rates: SubscriptionRates
     status: str = "active"
     
+    # Expiry Reminders & Renewals
+    days_remaining: Optional[int] = None
+    expiry_reminder_status: Optional[str] = "none" # "7_days", "3_days", "1_day", "expired", "none"
+    renewed_from_subscription_id: Optional[str] = None
+    invoice_number: Optional[str] = None
+
     # Extension tracking
     pending_breakfast_extensions: int = 0
     pending_lunch_extensions: int = 0

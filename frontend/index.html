@@ -57,6 +57,10 @@
           <i class="fas fa-boxes-stacked"></i>
           <span>Inventory</span>
         </a>
+        <a class="nav-item" data-tab="reports" onclick="switchTab('reports')">
+          <i class="fas fa-chart-line"></i>
+          <span>Reports & Analytics</span>
+        </a>
         <a class="nav-item" data-tab="settings" onclick="switchTab('settings')">
           <i class="fas fa-sliders"></i>
           <span>Settings</span>
@@ -170,6 +174,13 @@
             <div>
               <h2 class="page-title">Subscription Manager</h2>
               <p class="page-subtitle">Manage active meal plans, delivery calendars & automatic renewals</p>
+            </div>
+          </div>
+
+          <div class="data-card" style="max-width: 680px; margin: 0 auto 1.5rem auto; border-color:var(--warning);">
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> Subscriptions Expiring Soon (7-Day Alerts)</h3>
+            <div id="expiring-subs-container">
+              <!-- Rendered dynamically by js/subscriptions/subscription-manager.js -->
             </div>
           </div>
 
@@ -367,7 +378,40 @@
           </div>
         </section>
 
-        <!-- 8. SETTINGS VIEW -->
+        <!-- 8. REPORTS & ANALYTICS VIEW -->
+        <section class="page-view" id="view-reports">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Executive Reports & Analytics Engine</h2>
+              <p class="page-subtitle">Generate invoice reports, collections, customer outstanding, payment modes & monthly revenue</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <input type="date" id="report-start-date" class="form-control" style="width:140px;" onchange="loadReportsData()">
+              <input type="date" id="report-end-date" class="form-control" style="width:140px;" onchange="loadReportsData()">
+              <select id="report-pay-status-filter" class="form-control" style="width:130px;" onchange="loadReportsData()">
+                <option value="">All Statuses</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="partially_paid">Partially Paid</option>
+              </select>
+              <select id="report-pay-mode-filter" class="form-control" style="width:130px;" onchange="loadReportsData()">
+                <option value="">All Modes</option>
+                <option value="upi">UPI</option>
+                <option value="gpay">Google Pay</option>
+                <option value="phonepe">PhonePe</option>
+                <option value="cash">Cash</option>
+                <option value="bank">Bank Transfer</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" onclick="exportReportsCSV()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+          </div>
+
+          <div id="reports-data-container">
+            <!-- Rendered dynamically by js/reports/reports-manager.js -->
+          </div>
+        </section>
+
+        <!-- 9. SETTINGS VIEW -->
         <section class="page-view" id="view-settings">
           <div class="page-header">
             <div>
@@ -406,6 +450,7 @@
   <script src="js/finance/ledger-manager.js"></script>
   <script src="js/expenses/expense-manager.js"></script>
   <script src="js/inventory/inventory-manager.js"></script>
+  <script src="js/reports/reports-manager.js"></script>
   <script src="js/settings/settings-manager.js"></script>
   <script src="js/app.js"></script>
 </body>
