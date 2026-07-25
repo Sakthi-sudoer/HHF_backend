@@ -54,6 +54,8 @@ function switchTab(tabId) {
     loadExpensesData();
   } else if (tabId === "inventory") {
     loadInventoryData();
+  } else if (tabId === "settings") {
+    loadSettingsData();
   }
 
   // Close mobile sidebar if open
