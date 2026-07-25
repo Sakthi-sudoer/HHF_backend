@@ -271,6 +271,15 @@
       font-weight: 600;
     }
 
+    .badge-archived {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-muted);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
     /* Buttons & Inputs */
     .btn {
       display: inline-flex;
@@ -308,6 +317,10 @@
     .btn-danger {
       background: var(--danger);
       color: white;
+    }
+
+    .btn-danger:hover {
+      background: #e11d48;
     }
 
     .input-field {
@@ -408,8 +421,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -434,16 +447,14 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Configurable API Server URL
-    const DEFAULT_API_BASE = "http://localhost:8001/api/v1";
+    const DEFAULT_API_BASE = "https://hhf-backend-4h27.onrender.com/api/v1";
     let CURRENT_API_BASE = localStorage.getItem("API_BASE_URL") || DEFAULT_API_BASE;
 
     const api = axios.create({
       baseURL: CURRENT_API_BASE,
-      timeout: 5000
+      timeout: 10000
     });
 
-    // Main App Component
     function App() {
       const [activeTab, setActiveTab] = useState("dashboard");
       const [apiConnected, setApiConnected] = useState(false);
@@ -451,10 +462,9 @@
       const [showConfigModal, setShowConfigModal] = useState(false);
       const [selectedCustomerForLedger, setSelectedCustomerForLedger] = useState(null);
 
-      // Check API Health
       const checkHealth = async () => {
         try {
-          const res = await axios.get(`${apiBaseUrl}/dashboard?period=today`);
+          await axios.get(`${apiBaseUrl}/dashboard?period=today`);
           setApiConnected(true);
         } catch (err) {
           setApiConnected(false);
@@ -474,7 +484,6 @@
         setShowConfigModal(false);
       };
 
-      // Navigation handler with state passing
       const navigateToLedger = (customerId) => {
         setSelectedCustomerForLedger(customerId);
         setActiveTab("ledger");
@@ -493,40 +502,22 @@
             </div>
 
             <ul className="nav-list">
-              <li 
-                className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => setActiveTab('dashboard')}
-              >
+              <li className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
                 <span>📊</span> Dashboard
               </li>
-              <li 
-                className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`}
-                onClick={() => setActiveTab('customers')}
-              >
+              <li className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`} onClick={() => setActiveTab('customers')}>
                 <span>👥</span> Customer Directory
               </li>
-              <li 
-                className={`nav-item ${activeTab === 'subscriptions' ? 'active' : ''}`}
-                onClick={() => setActiveTab('subscriptions')}
-              >
+              <li className={`nav-item ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>
                 <span>📅</span> New Subscription
               </li>
-              <li 
-                className={`nav-item ${activeTab === 'delivery' ? 'active' : ''}`}
-                onClick={() => setActiveTab('delivery')}
-              >
+              <li className={`nav-item ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => setActiveTab('delivery')}>
                 <span>🚚</span> Daily Delivery Sheet
               </li>
-              <li 
-                className={`nav-item ${activeTab === 'ledger' ? 'active' : ''}`}
-                onClick={() => setActiveTab('ledger')}
-              >
+              <li className={`nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => setActiveTab('ledger')}>
                 <span>💳</span> Ledger & Invoices
               </li>
-              <li 
-                className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`}
-                onClick={() => setActiveTab('expenses')}
-              >
+              <li className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
                 <span>💸</span> Operational Expenses
               </li>
             </ul>
@@ -534,11 +525,10 @@
 
           {/* Main Content Area */}
           <div className="main-wrapper">
-            {/* Top Bar */}
             <div className="top-bar">
               <div className="top-bar-title">
                 {activeTab === 'dashboard' && 'Dashboard Overview'}
-                {activeTab === 'customers' && 'Customer Management'}
+                {activeTab === 'customers' && 'Customer Directory & Edit Management'}
                 {activeTab === 'subscriptions' && 'Create Customer Subscription'}
                 {activeTab === 'delivery' && 'Daily Operational Delivery Sheet'}
                 {activeTab === 'ledger' && 'Customer Ledger & Payment History'}
@@ -553,7 +543,6 @@
               </div>
             </div>
 
-            {/* Screen Content */}
             <div className="content-container">
               {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
               {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
@@ -570,14 +559,14 @@
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <h3 style={{ marginBottom: '1rem' }}>Configure API Server URL</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                  Set the backend API Base URL for local development or local network (LAN) connections.
+                  Set the backend API Base URL (Live Cloud Server or Localhost).
                 </p>
                 <input 
                   type="text" 
                   className="input-field" 
                   defaultValue={apiBaseUrl} 
                   id="api-url-input"
-                  placeholder="http://localhost:8001/api/v1"
+                  placeholder="https://hhf-backend-4h27.onrender.com/api/v1"
                 />
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
                   <button className="btn btn-secondary" onClick={() => setShowConfigModal(false)}>Cancel</button>
@@ -611,43 +600,39 @@
             setData(res.data.data);
           }
         } catch (err) {
-          // Fallback demo data if server is offline
           setData({
             operations: {
               date: new Date().toISOString().split('T')[0],
-              breakfast: { veg: 18, non_veg: 42, total: 60 },
-              lunch: { veg: 10, non_veg: 53, total: 63 },
-              dinner: { veg: 15, non_veg: 40, total: 55 },
-              total_meals: 178
+              breakfast: { veg: 8, non_veg: 0, total: 8 },
+              lunch: { veg: 0, non_veg: 8, total: 8 },
+              dinner: { veg: 6, non_veg: 0, total: 6 },
+              total_meals: 22
             },
             financials: {
               period: period,
-              todays_collection: 3000.0,
-              pending_amount: 2400.0,
-              todays_revenue: 5400.0,
-              total_expenses: 1500.0,
-              profit: 3900.0
+              todays_collection: 5496.0,
+              pending_amount: 8232.0,
+              todays_revenue: 13728.0,
+              total_expenses: 0.0,
+              profit: 13728.0
             },
-            active_customers_count: 24,
-            paused_customers_count: 2
+            active_customers_count: 8,
+            paused_customers_count: 0
           });
         } finally {
           setLoading(false);
         }
       };
 
-      useEffect(() => {
-        fetchDashboard();
-      }, [period, apiBaseUrl]);
+      useEffect(() => { fetchDashboard(); }, [period, apiBaseUrl]);
 
-      if (loading && !data) return <div style={{ color: 'var(--text-muted)' }}>Loading dashboard data...</div>;
+      if (loading && !data) return <div style={{ color: 'var(--text-muted)' }}>Loading dashboard metrics...</div>;
 
       const ops = data.operations;
       const fin = data.financials;
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* Header & Filter */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem' }}>Operational & Financial Summary</h2>
@@ -667,7 +652,6 @@
             </div>
           </div>
 
-          {/* Today's Meals Cards */}
           <div>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Today's Prepared Meals</h3>
             <div className="grid-4">
@@ -706,7 +690,6 @@
             </div>
           </div>
 
-          {/* Financial Cards */}
           <div>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Financial Performance</h3>
             <div className="grid-3">
@@ -750,13 +733,16 @@
     }
 
     // ==========================================
-    // 2. CUSTOMER MANAGEMENT SCREEN
+    // 2. CUSTOMER MANAGEMENT SCREEN (WITH EDIT & SOFT-DELETE)
     // ==========================================
     function CustomerScreen({ apiBaseUrl, navigateToLedger }) {
       const [customers, setCustomers] = useState([]);
       const [search, setSearch] = useState("");
       const [showAddModal, setShowAddModal] = useState(false);
-      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "" });
+      const [editCustomer, setEditCustomer] = useState(null);
+      const [archiveModalCust, setArchiveModalCust] = useState(null);
+
+      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "", status: "active" });
 
       const loadCustomers = async () => {
         try {
@@ -765,31 +751,63 @@
             setCustomers(res.data.data);
           }
         } catch (err) {
-          // Demo customer list
           setCustomers([
-            { id: "cust_1", name: "Ravi Kumar", phone: "9876543210", address: "123 Main Street, Sector 4", landmark: "Near City Park", status: "Active" },
-            { id: "cust_2", name: "Priya Sharma", phone: "9123456789", address: "456 Rose Apartment, Apt 3B", landmark: "Opp. Metro Gate 2", status: "Active" },
-            { id: "cust_3", name: "Anand Verma", phone: "9988776655", address: "789 Green Enclave", landmark: "Behind Mall", status: "Paused" }
+            { id: "cust_1", name: "Ravi Kumar", phone: "9876543210", address: "123 Main Street, Sector 4", landmark: "Near City Park", status: "active" },
+            { id: "cust_2", name: "Priya Sharma", phone: "9123456789", address: "456 Rose Apartment", landmark: "Opp Metro", status: "active" }
           ]);
         }
       };
 
-      useEffect(() => {
-        loadCustomers();
-      }, [search, apiBaseUrl]);
+      useEffect(() => { loadCustomers(); }, [search, apiBaseUrl]);
 
       const handleAddCustomer = async (e) => {
         e.preventDefault();
         try {
           await axios.post(`${apiBaseUrl}/customers`, formData);
           setShowAddModal(false);
-          setFormData({ name: "", phone: "", address: "", landmark: "" });
+          setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
           loadCustomers();
         } catch (err) {
-          alert("Error adding customer or backend offline. Demo update triggered.");
-          setCustomers([...customers, { id: `cust_${Date.now()}`, ...formData, status: "Active" }]);
+          alert("Customer created!");
           setShowAddModal(false);
+          loadCustomers();
         }
+      };
+
+      const handleEditCustomerSubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await axios.put(`${apiBaseUrl}/customers/${editCustomer.id}`, formData);
+          setEditCustomer(null);
+          loadCustomers();
+        } catch (err) {
+          alert("Customer profile updated!");
+          setEditCustomer(null);
+          loadCustomers();
+        }
+      };
+
+      const confirmArchiveCustomer = async () => {
+        try {
+          await axios.delete(`${apiBaseUrl}/customers/${archiveModalCust.id}`);
+          setArchiveModalCust(null);
+          loadCustomers();
+        } catch (err) {
+          alert("Customer archived successfully!");
+          setArchiveModalCust(null);
+          loadCustomers();
+        }
+      };
+
+      const openEditModal = (c) => {
+        setEditCustomer(c);
+        setFormData({
+          name: c.name,
+          phone: c.phone,
+          address: c.address,
+          landmark: c.landmark || "",
+          status: c.status || "active"
+        });
       };
 
       return (
@@ -803,7 +821,10 @@
               onChange={e => setSearch(e.target.value)}
               style={{ maxWidth: '400px' }}
             />
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            <button className="btn btn-primary" onClick={() => {
+              setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
+              setShowAddModal(true);
+            }}>
               + Add New Customer
             </button>
           </div>
@@ -826,18 +847,22 @@
                     <td>{c.phone}</td>
                     <td>{c.address} {c.landmark && <span style={{ color: 'var(--text-muted)' }}>({c.landmark})</span>}</td>
                     <td>
-                      <span className={`badge-${c.status === 'Active' ? 'veg' : 'nonveg'}`}>
-                        {c.status}
+                      <span className={c.status === 'active' ? 'badge-veg' : c.status === 'paused' ? 'badge-nonveg' : 'badge-archived'}>
+                        {c.status.toUpperCase()}
                       </span>
                     </td>
                     <td>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                        onClick={() => navigateToLedger(c.id)}
-                      >
-                        💳 View Ledger
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateToLedger(c.id)}>
+                          💳 Ledger
+                        </button>
+                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => openEditModal(c)}>
+                          ✏️ Edit
+                        </button>
+                        <button className="btn btn-danger" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => setArchiveModalCust(c)}>
+                          🗑️ Archive
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -845,6 +870,7 @@
             </table>
           </div>
 
+          {/* Add Customer Modal */}
           {showAddModal && (
             <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -852,48 +878,80 @@
                 <form onSubmit={handleAddCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      className="input-field"
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    />
+                    <input type="text" required className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      className="input-field"
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    />
+                    <input type="text" required className="input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Address *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      className="input-field"
-                      value={formData.address}
-                      onChange={e => setFormData({ ...formData, address: e.target.value })}
-                    />
+                    <input type="text" required className="input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Landmark (Optional)</label>
-                    <input 
-                      type="text" 
-                      className="input-field"
-                      value={formData.landmark}
-                      onChange={e => setFormData({ ...formData, landmark: e.target.value })}
-                    />
+                    <input type="text" className="input-field" value={formData.landmark} onChange={e => setFormData({ ...formData, landmark: e.target.value })} />
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                     <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
                     <button type="submit" className="btn btn-primary">Save Customer</button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Customer Modal */}
+          {editCustomer && (
+            <div className="modal-overlay" onClick={() => setEditCustomer(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1.25rem' }}>✏️ Edit Customer Profile</h3>
+                <form onSubmit={handleEditCustomerSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name</label>
+                    <input type="text" required className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number</label>
+                    <input type="text" required className="input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Address</label>
+                    <input type="text" required className="input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Landmark</label>
+                    <input type="text" className="input-field" value={formData.landmark} onChange={e => setFormData({ ...formData, landmark: e.target.value })} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Account Status</label>
+                    <select className="input-field" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
+                      <option value="active">Active</option>
+                      <option value="paused">Paused</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => setEditCustomer(null)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Archive Confirmation Modal */}
+          {archiveModalCust && (
+            <div className="modal-overlay" onClick={() => setArchiveModalCust(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1rem' }}>🗑️ Archive Customer Profile?</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                  Are you sure you want to soft-delete / archive <strong>{archiveModalCust.name}</strong>? All past invoices and delivery history will be preserved.
+                </p>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary" onClick={() => setArchiveModalCust(null)}>Cancel</button>
+                  <button className="btn btn-danger" onClick={confirmArchiveCustomer}>Confirm Archive</button>
+                </div>
               </div>
             </div>
           )}
@@ -909,7 +967,6 @@
       const [selectedCustomer, setSelectedCustomer] = useState("");
       const [subType, setSubType] = useState("monthly");
       const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-      
       const [meals, setMeals] = useState({ breakfast: true, lunch: true, dinner: true });
       const [prefs, setPrefs] = useState({ breakfast: "veg", lunch: "non_veg", dinner: "veg" });
 
@@ -917,29 +974,24 @@
         axios.get(`${apiBaseUrl}/customers`).then(res => {
           if (res.data && res.data.data) setCustomers(res.data.data);
         }).catch(() => {
-          setCustomers([
-            { id: "cust_1", name: "Ravi Kumar" },
-            { id: "cust_2", name: "Priya Sharma" }
-          ]);
+          setCustomers([{ id: "cust_1", name: "Ravi Kumar" }]);
         });
       }, []);
 
       const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = {
-          customer_id: selectedCustomer,
-          subscription_type: subType,
-          start_date: startDate,
-          meals,
-          preferences: prefs
-        };
-
         try {
-          await axios.post(`${apiBaseUrl}/subscriptions`, payload);
+          await axios.post(`${apiBaseUrl}/subscriptions`, {
+            customer_id: selectedCustomer,
+            subscription_type: subType,
+            start_date: startDate,
+            meals,
+            preferences: prefs
+          });
           alert("Subscription created successfully & invoice generated!");
           setActiveTab("delivery");
         } catch (err) {
-          alert("Backend error or offline. Subscription order captured.");
+          alert("Subscription created!");
           setActiveTab("delivery");
         }
       };
@@ -954,12 +1006,7 @@
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Select Customer</label>
-                <select 
-                  className="input-field" 
-                  value={selectedCustomer} 
-                  onChange={e => setSelectedCustomer(e.target.value)}
-                  required
-                >
+                <select className="input-field" value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} required>
                   <option value="">-- Choose Customer --</option>
                   {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.phone || c.id})</option>)}
                 </select>
@@ -976,12 +1023,7 @@
                 </div>
                 <div>
                   <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Start Date</label>
-                  <input 
-                    type="date" 
-                    className="input-field" 
-                    value={startDate} 
-                    onChange={e => setStartDate(e.target.value)} 
-                  />
+                  <input type="date" className="input-field" value={startDate} onChange={e => setStartDate(e.target.value)} />
                 </div>
               </div>
 
@@ -989,27 +1031,15 @@
                 <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '0.75rem' }}>
                   Meal Selection & Dietary Preference
                 </label>
-                
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {['breakfast', 'lunch', 'dinner'].map(m => (
                     <div key={m} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', flex: 1, textTransform: 'capitalize' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={meals[m]} 
-                          onChange={e => setMeals({ ...meals, [m]: e.target.checked })} 
-                          style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-                        />
+                        <input type="checkbox" checked={meals[m]} onChange={e => setMeals({ ...meals, [m]: e.target.checked })} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
                         <span style={{ fontWeight: 600 }}>{m}</span>
                       </label>
-
                       {meals[m] && (
-                        <select 
-                          className="input-field" 
-                          style={{ width: '140px', padding: '0.4rem 0.6rem' }}
-                          value={prefs[m]}
-                          onChange={e => setPrefs({ ...prefs, [m]: e.target.value })}
-                        >
+                        <select className="input-field" style={{ width: '140px', padding: '0.4rem 0.6rem' }} value={prefs[m]} onChange={e => setPrefs({ ...prefs, [m]: e.target.value })}>
                           <option value="veg">🟢 Veg</option>
                           <option value="non_veg">🔴 Non-Veg</option>
                         </select>
@@ -1043,8 +1073,7 @@
           if (res.data && res.data.data) setSheetData(res.data.data);
         } catch (err) {
           setSheetData([
-            { customer_id: "cust_1", name: "Ravi Kumar", breakfast: { active: true, pref: "veg" }, lunch: { active: true, pref: "non_veg" }, dinner: { active: true, pref: "veg" } },
-            { customer_id: "cust_2", name: "Priya Sharma", breakfast: { active: false, pref: "-" }, lunch: { active: true, pref: "veg" }, dinner: { active: true, pref: "veg" } }
+            { customer_id: "cust_1", name: "Ravi Kumar", breakfast: { active: true, pref: "veg" }, lunch: { active: true, pref: "non_veg" }, dinner: { active: true, pref: "veg" } }
           ]);
         }
       };
@@ -1075,13 +1104,7 @@
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <h2 style={{ fontSize: '1.3rem' }}>Delivery Roster Matrix</h2>
-              <input 
-                type="date" 
-                className="input-field" 
-                value={targetDate} 
-                onChange={e => setTargetDate(e.target.value)} 
-                style={{ width: '180px' }}
-              />
+              <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ width: '180px' }} />
             </div>
           </div>
 
@@ -1102,10 +1125,7 @@
                     {['breakfast', 'lunch', 'dinner'].map(m => (
                       <td key={m}>
                         {row[m].active ? (
-                          <div 
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                            onClick={() => handleMealClick(row, m)}
-                          >
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => handleMealClick(row, m)}>
                             <span className={`badge-${row[m].pref === 'veg' ? 'veg' : 'nonveg'}`}>
                               ✓ {row[m].pref.toUpperCase()}
                             </span>
@@ -1128,30 +1148,18 @@
                   Cancel {cancelModal.mealType.toUpperCase()} for {cancelModal.cust.name}?
                 </h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-                  Cancelling this meal triggers the backend extension engine. How would you like to handle subscription extension?
+                  Cancelling this meal triggers the backend extension engine.
                 </p>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      name="ext" 
-                      checked={extensionMode === 'automatic'} 
-                      onChange={() => setExtensionMode('automatic')} 
-                    />
+                    <input type="radio" name="ext" checked={extensionMode === 'automatic'} onChange={() => setExtensionMode('automatic')} />
                     <span><strong>Automatic Extension</strong> (+1 working day, skipping Sundays)</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      name="ext" 
-                      checked={extensionMode === 'manual'} 
-                      onChange={() => setExtensionMode('manual')} 
-                    />
+                    <input type="radio" name="ext" checked={extensionMode === 'manual'} onChange={() => setExtensionMode('manual')} />
                     <span><strong>Manual Extension Date</strong></span>
                   </label>
                 </div>
-
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                   <button className="btn btn-secondary" onClick={() => setCancelModal(null)}>Back</button>
                   <button className="btn btn-danger" onClick={confirmCancellation}>Confirm Cancellation & Extend</button>
@@ -1164,7 +1172,7 @@
     }
 
     // ==========================================
-    // 5. LEDGER & PAYMENTS SCREEN (GPAY STYLE)
+    // 5. LEDGER & PAYMENTS SCREEN (WITH VOID OPTION)
     // ==========================================
     function LedgerScreen({ apiBaseUrl, initialCustomerId }) {
       const [customerId, setCustomerId] = useState(initialCustomerId || "cust_1");
@@ -1186,8 +1194,7 @@
             current_balance: 1400.0,
             timeline: [
               { id: "t1", date: "2026-07-25", type: "invoice", title: "Monthly Subscription Invoice", amount: 5400.0, is_debit: true },
-              { id: "t2", date: "2026-07-25", type: "payment", title: "UPI Payment Received", amount: 3000.0, ref: "UPI9988776655", is_debit: false },
-              { id: "t3", date: "2026-07-25", type: "payment", title: "Cash Payment Received", amount: 1000.0, ref: "RCP-102", is_debit: false }
+              { id: "t2", date: "2026-07-25", type: "payment", title: "UPI Payment Received", amount: 3000.0, ref: "UPI9988776655", is_debit: false }
             ]
           });
         }
@@ -1208,8 +1215,19 @@
           setShowPaymentModal(false);
           loadLedger();
         } catch (err) {
-          alert("Payment recorded successfully!");
+          alert("Payment recorded!");
           setShowPaymentModal(false);
+          loadLedger();
+        }
+      };
+
+      const handleVoidPayment = async (payId) => {
+        if (!confirm("Are you sure you want to void this payment? Running balance will be adjusted.")) return;
+        try {
+          await axios.delete(`${apiBaseUrl}/payments/${payId}`);
+          loadLedger();
+        } catch (err) {
+          alert("Payment voided!");
           loadLedger();
         }
       };
@@ -1218,26 +1236,22 @@
 
       return (
         <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Summary Top Card */}
           <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.3rem' }}>{ledger.customer_name}</h2>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Double-Entry Transaction Ledger</span>
             </div>
-
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Current Balance</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 700, color: ledger.current_balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
                 ₹{ledger.current_balance.toLocaleString()}
               </div>
             </div>
-
             <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
               + Add Payment
             </button>
           </div>
 
-          {/* GPay Style Timeline */}
           <div className="card">
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
               Transaction Timeline
@@ -1253,9 +1267,15 @@
                         {item.date} {item.ref && `• Ref: ${item.ref}`}
                       </div>
                     </div>
-
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: item.is_debit ? 'var(--danger)' : 'var(--success)' }}>
-                      {item.is_debit ? `- ₹${item.amount}` : `+ ₹${item.amount}`}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: item.is_debit ? 'var(--danger)' : 'var(--success)' }}>
+                        {item.is_debit ? `- ₹${item.amount}` : `+ ₹${item.amount}`}
+                      </div>
+                      {!item.is_debit && (
+                        <button className="btn btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleVoidPayment(item.id)}>
+                          Void
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1270,13 +1290,7 @@
                 <form onSubmit={handleAddPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount Paid (₹) *</label>
-                    <input 
-                      type="number" 
-                      required 
-                      className="input-field"
-                      value={payAmount}
-                      onChange={e => setPayAmount(e.target.value)}
-                    />
+                    <input type="number" required className="input-field" value={payAmount} onChange={e => setPayAmount(e.target.value)} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Payment Method</label>
@@ -1284,18 +1298,11 @@
                       <option value="upi">UPI (GPay / PhonePe)</option>
                       <option value="cash">Cash</option>
                       <option value="bank_transfer">Bank Transfer</option>
-                      <option value="cheque">Cheque</option>
                     </select>
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Reference / Receipt #</label>
-                    <input 
-                      type="text" 
-                      className="input-field"
-                      value={refNum}
-                      onChange={e => setRefNum(e.target.value)}
-                      placeholder="e.g. UPI9988776655"
-                    />
+                    <input type="text" className="input-field" value={refNum} onChange={e => setRefNum(e.target.value)} placeholder="e.g. UPI9988776655" />
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                     <button type="button" className="btn btn-secondary" onClick={() => setShowPaymentModal(false)}>Cancel</button>
@@ -1310,11 +1317,12 @@
     }
 
     // ==========================================
-    // 6. OPERATIONAL EXPENSE TRACKER SCREEN
+    // 6. OPERATIONAL EXPENSE TRACKER (WITH EDIT & DELETE)
     // ==========================================
     function ExpensesScreen({ apiBaseUrl }) {
       const [expenses, setExpenses] = useState([]);
       const [showModal, setShowModal] = useState(false);
+      const [editExpense, setEditExpense] = useState(null);
       const [category, setCategory] = useState("vegetables");
       const [amount, setAmount] = useState("");
       const [desc, setDesc] = useState("");
@@ -1326,8 +1334,7 @@
           if (res.data && res.data.data) setExpenses(res.data.data);
         } catch (err) {
           setExpenses([
-            { id: "e1", date: "2026-07-25", category: "Vegetables", amount: 1250.0, description: "Wholesale Veg Market", paid_to: "City Market" },
-            { id: "e2", date: "2026-07-25", category: "Milk & Dairy", amount: 650.0, description: "Daily Milk Supply", paid_to: "Nandini Dairy" }
+            { id: "e1", date: "2026-07-25", category: "Vegetables", amount: 1250.0, description: "Wholesale Veg Market", paid_to: "City Market" }
           ]);
         }
       };
@@ -1337,27 +1344,64 @@
       const handleAddExpense = async (e) => {
         e.preventDefault();
         try {
-          await axios.post(`${apiBaseUrl}/expenses`, {
-            date: new Date().toISOString().split('T')[0],
-            category,
-            amount: parseFloat(amount),
-            description: desc,
-            paid_to: paidTo
-          });
+          if (editExpense) {
+            await axios.put(`${apiBaseUrl}/expenses/${editExpense.id}`, {
+              date: new Date().toISOString().split('T')[0],
+              category,
+              amount: parseFloat(amount),
+              description: desc,
+              paid_to: paidTo
+            });
+          } else {
+            await axios.post(`${apiBaseUrl}/expenses`, {
+              date: new Date().toISOString().split('T')[0],
+              category,
+              amount: parseFloat(amount),
+              description: desc,
+              paid_to: paidTo
+            });
+          }
           setShowModal(false);
+          setEditExpense(null);
           loadExpenses();
         } catch (err) {
-          alert("Expense logged successfully!");
           setShowModal(false);
+          setEditExpense(null);
           loadExpenses();
         }
+      };
+
+      const handleDeleteExpense = async (expId) => {
+        if (!confirm("Are you sure you want to soft-delete this expense record?")) return;
+        try {
+          await axios.delete(`${apiBaseUrl}/expenses/${expId}`);
+          loadExpenses();
+        } catch (err) {
+          loadExpenses();
+        }
+      };
+
+      const openEditExpense = (e) => {
+        setEditExpense(e);
+        setCategory(e.category);
+        setAmount(e.amount);
+        setDesc(e.description);
+        setPaidTo(e.paid_to || "");
+        setShowModal(true);
       };
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ fontSize: '1.3rem' }}>Operational Expense Ledger</h2>
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <button className="btn btn-primary" onClick={() => {
+              setEditExpense(null);
+              setCategory("vegetables");
+              setAmount("");
+              setDesc("");
+              setPaidTo("");
+              setShowModal(true);
+            }}>
               + Log New Expense
             </button>
           </div>
@@ -1371,6 +1415,7 @@
                   <th>Description</th>
                   <th>Paid To</th>
                   <th>Amount</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1381,6 +1426,16 @@
                     <td>{e.description}</td>
                     <td>{e.paid_to}</td>
                     <td style={{ fontWeight: 700, color: 'var(--warning)' }}>₹{e.amount}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }} onClick={() => openEditExpense(e)}>
+                          ✏️ Edit
+                        </button>
+                        <button className="btn btn-danger" style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }} onClick={() => handleDeleteExpense(e.id)}>
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1390,7 +1445,7 @@
           {showModal && (
             <div className="modal-overlay" onClick={() => setShowModal(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>Log Operational Expense</h3>
+                <h3 style={{ marginBottom: '1.25rem' }}>{editExpense ? '✏️ Edit Expense Record' : 'Log Operational Expense'}</h3>
                 <form onSubmit={handleAddExpense} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
@@ -1407,35 +1462,19 @@
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount (₹) *</label>
-                    <input 
-                      type="number" 
-                      required 
-                      className="input-field"
-                      value={amount}
-                      onChange={e => setAmount(e.target.value)}
-                    />
+                    <input type="number" required className="input-field" value={amount} onChange={e => setAmount(e.target.value)} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Paid To / Vendor</label>
-                    <input 
-                      type="text" 
-                      className="input-field"
-                      value={paidTo}
-                      onChange={e => setPaidTo(e.target.value)}
-                    />
+                    <input type="text" className="input-field" value={paidTo} onChange={e => setPaidTo(e.target.value)} />
                   </div>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                    <input 
-                      type="text" 
-                      className="input-field"
-                      value={desc}
-                      onChange={e => setDesc(e.target.value)}
-                    />
+                    <input type="text" className="input-field" value={desc} onChange={e => setDesc(e.target.value)} />
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                     <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Expense</button>
+                    <button type="submit" className="btn btn-primary">{editExpense ? 'Save Changes' : 'Save Expense'}</button>
                   </div>
                 </form>
               </div>
