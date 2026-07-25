@@ -82,15 +82,29 @@
         </div>
 
         <div class="top-actions">
+          <!-- Accessibility Font Scale Bar -->
+          <div class="acc-bar" title="Font Size Accessibility Scale">
+            <button class="acc-btn font-scale-btn" data-size="normal" onclick="setFontSize('normal')">A</button>
+            <button class="acc-btn font-scale-btn" data-size="large" onclick="setFontSize('large')">A+</button>
+            <button class="acc-btn font-scale-btn" data-size="xlarge" onclick="setFontSize('xlarge')">A++</button>
+          </div>
+
+          <!-- Theme Switcher -->
+          <button class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+
+          <!-- Quick Server Toggle -->
+          <button class="btn btn-secondary btn-sm" onclick="toggleQuickServer()" title="Toggle Localhost / Cloud Server">
+            <i class="fas fa-server"></i> Server
+          </button>
+
           <!-- Quick Action Buttons -->
           <button class="btn btn-primary btn-sm" id="quick-add-cust-btn" onclick="openAddCustomerModal()">
             <i class="fas fa-user-plus"></i> Add Customer
           </button>
           <button class="btn btn-secondary btn-sm" id="quick-record-pmt-btn" onclick="openPaymentModal()">
             <i class="fas fa-plus-circle"></i> Record Payment
-          </button>
-          <button class="btn btn-secondary btn-sm" id="server-config-btn" onclick="openConfigModal()">
-            <i class="fas fa-wifi"></i> API Server
           </button>
         </div>
       </header>
@@ -235,10 +249,13 @@
               <h2 class="page-title">Daily Delivery Sheet & Leave Extensions</h2>
               <p class="page-subtitle">Track daily meal delivery matrix, cancellations & automated working day extensions</p>
             </div>
-            <div style="display:flex; align-items:center; gap:1rem;">
-              <input type="date" class="form-control" id="delivery-date-picker" onchange="loadDeliverySheet()" style="width:180px;">
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="changeDeliveryDateOffset(-1)">◀ Prev</button>
+              <button class="btn btn-secondary btn-sm" onclick="setDeliveryDateToday()">Today</button>
+              <button class="btn btn-secondary btn-sm" onclick="changeDeliveryDateOffset(1)">Next ▶</button>
+              <input type="date" class="form-control" id="delivery-date-picker" onchange="loadDeliverySheet()" style="width:160px;">
               <button class="btn btn-secondary btn-sm" onclick="exportCSV('delivery')">
-                <i class="fas fa-download"></i> Export Sheet
+                <i class="fas fa-download"></i> Export
               </button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-// Daily Deliveries & Leave Extensions Manager
+// Daily Deliveries & Leave Extensions Manager with Date Stepper
 async function loadDeliverySheet() {
   const picker = document.getElementById("delivery-date-picker");
   const targetDate = picker && picker.value ? picker.value : new Date().toISOString().split('T')[0];
@@ -15,6 +15,22 @@ async function loadDeliverySheet() {
     ];
     renderDeliverySheetRows(state.deliverySheet, targetDate, tbody);
   }
+}
+
+function changeDeliveryDateOffset(offsetDays) {
+  const picker = document.getElementById("delivery-date-picker");
+  if (!picker) return;
+  const curr = new Date(picker.value || new Date());
+  curr.setDate(curr.getDate() + offsetDays);
+  picker.value = curr.toISOString().split('T')[0];
+  loadDeliverySheet();
+}
+
+function setDeliveryDateToday() {
+  const picker = document.getElementById("delivery-date-picker");
+  if (!picker) return;
+  picker.value = new Date().toISOString().split('T')[0];
+  loadDeliverySheet();
 }
 
 function renderDeliverySheetRows(list, targetDate, tbody) {
@@ -41,12 +57,10 @@ function renderMealCellBadge(row, mealType, customerName, customerId, targetDate
   const m = row[mealType];
   if (!m) return `<span style="color:var(--text-dim);">-</span>`;
 
-  // If cancelled
   if (m.cancelled) {
     return `<span class="badge badge-warning" title="Meal Cancelled - Validity Extended +1 Day">❌ Cancelled (+1 Day)</span>`;
   }
 
-  // If delivered / active
   const pref = (m.preference || m.pref || "veg").toLowerCase();
   const isVeg = pref === 'veg';
   const isDelivered = m.delivered !== undefined ? m.delivered : m.active;

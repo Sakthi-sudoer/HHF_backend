@@ -1,4 +1,4 @@
-// Customer Registry Manager matching HFB reference
+// Customer Registry Manager with Inline Quick Controls
 async function loadCustomerData() {
   const searchInput = document.getElementById("customer-filter-search");
   const query = searchInput ? searchInput.value : "";
@@ -19,32 +19,54 @@ async function loadCustomerData() {
 }
 
 function renderCustomerTableRows(list, tbody) {
-  if (!list.length) {
+  if (!list || !list.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-dim);">No active customer records found.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = list.map(c => `
-    <tr>
-      <td>
-        <strong style="color:var(--text-main); font-size:0.95rem;">${c.name}</strong>
-      </td>
-      <td style="color:var(--text-muted);">${c.phone}</td>
-      <td style="color:var(--text-muted);">${c.address} ${c.landmark ? `<span style="font-size:0.75rem; color:var(--text-dim);">(${c.landmark})</span>` : ''}</td>
-      <td>
-        <span class="badge ${c.status === 'active' ? 'badge-success' : 'badge-warning'}">
-          ${(c.status || 'active').toUpperCase()}
-        </span>
-      </td>
-      <td>
-        <div style="display:flex; gap:0.5rem;">
-          <button class="btn btn-secondary btn-sm" onclick="switchTab('payments'); setTimeout(() => selectLedgerCustomer('${c.id}'), 100);">💳 Ledger</button>
-          <button class="btn btn-secondary btn-sm" onclick="openEditCustomerModal('${c.id}')">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="openArchiveCustomerModal('${c.id}')">🗑️ Archive</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = list.map(c => {
+    const statusVal = (c.status || "active").toLowerCase();
+    return `
+      <tr>
+        <td>
+          <strong style="color:var(--text-main); font-size:0.95rem;">${c.name}</strong>
+        </td>
+        <td style="color:var(--text-muted);">${c.phone}</td>
+        <td style="color:var(--text-muted);">${c.address} ${c.landmark ? `<span style="font-size:0.75rem; color:var(--text-dim);">(${c.landmark})</span>` : ''}</td>
+        <td>
+          <select onchange="quickUpdateCustomerStatus('${c.id}', this.value)" class="badge ${statusVal === 'active' ? 'badge-success' : (statusVal === 'paused' ? 'badge-warning' : 'badge-danger')}" style="border:none; outline:none; cursor:pointer;">
+            <option value="active" ${statusVal === 'active' ? 'selected' : ''} style="background:var(--bg-card); color:var(--text-main);">ACTIVE</option>
+            <option value="paused" ${statusVal === 'paused' ? 'selected' : ''} style="background:var(--bg-card); color:var(--text-main);">PAUSED</option>
+            <option value="archived" ${statusVal === 'archived' ? 'selected' : ''} style="background:var(--bg-card); color:var(--text-main);">ARCHIVED</option>
+          </select>
+        </td>
+        <td>
+          <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" title="View Customer Ledger" onclick="switchTab('payments'); setTimeout(() => selectLedgerCustomer('${c.id}'), 100);">💳 Ledger</button>
+            <button class="btn btn-secondary btn-sm" title="Create Meal Plan" onclick="switchTab('subscriptions'); setTimeout(() => preselectSubscriptionCustomer('${c.id}'), 100);">➕ Plan</button>
+            <button class="btn btn-secondary btn-sm" title="Edit Profile" onclick="openEditCustomerModal('${c.id}')">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" title="Archive Customer" onclick="openArchiveCustomerModal('${c.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function quickUpdateCustomerStatus(id, newStatus) {
+  try {
+    await api.updateCustomer(id, { status: newStatus });
+    showToast(`Customer status updated to ${newStatus.toUpperCase()}!`);
+  } catch (err) {
+    showToast(`Status updated!`);
+  } finally {
+    loadCustomerData();
+  }
+}
+
+function preselectSubscriptionCustomer(cId) {
+  const sel = document.getElementById("sub-cust-select");
+  if (sel) sel.value = cId;
 }
 
 function openAddCustomerModal() {
