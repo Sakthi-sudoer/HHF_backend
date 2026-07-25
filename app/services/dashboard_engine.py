@@ -1,6 +1,7 @@
 import time
 from datetime import date, datetime, timedelta
 from typing import Optional, List, Dict, Any
+from concurrent.futures import ThreadPoolExecutor
 from app.models.dashboard import (
     DashboardSummaryResponse, OperationsTodayStats, MealTypeStats, FinancialCardsStats
 )
@@ -12,9 +13,9 @@ from app.repositories.invoice_repository import InvoiceRepository
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.services.settings_service import SettingsService
 
-# Fast 10-second TTL Cache for Dashboard queries
+# Ultra-fast TTL Cache for Dashboard (60 seconds for instant load)
 _DASHBOARD_CACHE: Dict[str, Any] = {}
-_DASHBOARD_CACHE_TTL = 10  # seconds
+_DASHBOARD_CACHE_TTL = 60  # seconds
 
 class DashboardEngine:
     def __init__(self):
@@ -42,10 +43,23 @@ class DashboardEngine:
 
         today_d = date.today()
         today_str = today_d.isoformat()
-        
-        # 1. Operational Stats for Today (Fast in-memory aggregation without blocking writes)
-        active_subs = self.sub_repo.get_all_active_subscriptions()
-        existing_today_deliveries = self.delivery_repo.get_by_date(today_str)
+
+        # Execute all Firestore queries in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            fut_subs = executor.submit(self.sub_repo.get_all_active_subscriptions)
+            fut_delivs = executor.submit(self.delivery_repo.get_by_date, today_str)
+            fut_payments = executor.submit(self.payment_repo.list_all)
+            fut_expenses = executor.submit(self.expense_repo.list_all)
+            fut_invoices = executor.submit(self.invoice_repo.list_all)
+            fut_custs = executor.submit(self.cust_repo.get_active_customers)
+
+            active_subs = fut_subs.result()
+            existing_today_deliveries = fut_delivs.result()
+            all_payments = fut_payments.result()
+            all_expenses = fut_expenses.result()
+            all_invoices = fut_invoices.result()
+            active_custs = fut_custs.result()
+
         existing_deliv_map = {d["customer_id"]: d for d in existing_today_deliveries}
 
         global_s = self.settings_service.get_settings()
@@ -125,11 +139,6 @@ class DashboardEngine:
 
         p_start_str, p_end_str = p_start.isoformat(), p_end.isoformat()
 
-        # Bulk fetch collections (4 single network calls total)
-        all_payments = self.payment_repo.list_all()
-        all_expenses = self.expense_repo.list_all()
-        all_invoices = self.invoice_repo.list_all()
-        active_custs = self.cust_repo.get_active_customers()
         active_cust_ids = {c["id"] for c in active_custs}
 
         # Collections & Expenses in period
@@ -181,7 +190,7 @@ class DashboardEngine:
             profit=profit
         )
 
-        paused_custs = self.cust_repo.list_all(filters=[("status", "==", "paused"), ("is_deleted", "==", False)])
+        paused_custs = [c for c in active_custs if c.get("status") == "paused"]
 
         response = DashboardSummaryResponse(
             operations=ops,
