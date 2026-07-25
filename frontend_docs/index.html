@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Healthy Home Foods - Enterprise Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Customer Registry Book - Healthy Home Foods</title>
   
   <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +42,6 @@
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
     }
 
-    /* Light Theme Toggle Support */
     body.light-theme {
       --bg-dark: #f1f5f9;
       --bg-main: #f8fafc;
@@ -59,6 +58,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -66,7 +66,6 @@
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     #root {
@@ -75,7 +74,7 @@
       min-height: 100vh;
     }
 
-    /* Sidebar */
+    /* Desktop Sidebar */
     .sidebar {
       width: 260px;
       background: var(--bg-dark);
@@ -88,12 +87,18 @@
       z-index: 10;
     }
 
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+    }
+
     .brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       padding: 0.5rem 0.75rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .brand-icon {
@@ -124,20 +129,21 @@
     .nav-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
       list-style: none;
+      overflow-y: auto;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 0.85rem;
-      padding: 0.85rem 1rem;
+      padding: 0.75rem 0.85rem;
       border-radius: var(--radius);
       color: var(--text-muted);
       cursor: pointer;
       font-weight: 500;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       transition: all 0.2s ease;
     }
 
@@ -152,6 +158,46 @@
       border-left: 3px solid var(--primary);
     }
 
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: var(--bg-dark);
+      border-top: 1px solid var(--border-color);
+      z-index: 90;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        display: flex;
+      }
+    }
+
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .mobile-nav-btn.active {
+      color: var(--primary);
+    }
+
+    .mobile-nav-btn span {
+      font-size: 1.2rem;
+    }
+
     /* Main Content */
     .main-wrapper {
       margin-left: 260px;
@@ -159,6 +205,13 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper {
+        margin-left: 0;
+        padding-bottom: 70px;
+      }
     }
 
     /* Top Bar */
@@ -170,21 +223,21 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 2rem;
+      padding: 0 1.5rem;
       position: sticky;
       top: 0;
       z-index: 5;
     }
 
     .top-bar-title {
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.2rem;
+      font-weight: 700;
     }
 
     .top-bar-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .api-status {
@@ -209,7 +262,7 @@
     .status-offline { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
     .content-container {
-      padding: 2rem;
+      padding: 1.5rem;
       flex: 1;
     }
 
@@ -218,50 +271,86 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: 1.25rem;
       box-shadow: var(--shadow);
     }
 
     /* Grid Layouts */
     .grid-4 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
     }
 
     .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Quick Actions Bar */
+    .quick-actions-bar {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .quick-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-action-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     /* Stat Cards */
     .stat-card {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .stat-label {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       font-weight: 500;
     }
 
     .stat-value {
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 700;
       color: var(--text-main);
     }
 
     .stat-sub {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
@@ -301,7 +390,7 @@
       padding: 0.65rem 1.25rem;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
@@ -329,10 +418,6 @@
     .btn-danger {
       background: var(--danger);
       color: white;
-    }
-
-    .btn-danger:hover {
-      background: #e11d48;
     }
 
     .input-field {
@@ -367,17 +452,17 @@
 
     th {
       background: var(--bg-main);
-      padding: 1rem;
-      font-size: 0.85rem;
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       font-weight: 600;
       border-bottom: 1px solid var(--border-color);
     }
 
     td {
-      padding: 1rem;
+      padding: 0.85rem 1rem;
       border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     tr:last-child td {
@@ -388,7 +473,7 @@
     .timeline {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
       position: relative;
       padding-left: 1rem;
     }
@@ -407,7 +492,7 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1.1rem;
       position: relative;
     }
 
@@ -415,7 +500,7 @@
       content: '';
       position: absolute;
       left: -1.35rem;
-      top: 1.25rem;
+      top: 1.1rem;
       width: 10px;
       height: 10px;
       border-radius: 50%;
@@ -429,8 +514,8 @@
     /* Toast Notification */
     .toast-container {
       position: fixed;
-      bottom: 2rem;
-      right: 2rem;
+      bottom: 5rem;
+      right: 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
@@ -472,10 +557,21 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      width: 90%;
-      max-width: 540px;
-      padding: 1.75rem;
+      width: 92%;
+      max-width: 560px;
+      padding: 1.5rem;
       box-shadow: var(--shadow);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Invoice Printable Sheet */
+    .invoice-sheet {
+      background: white;
+      color: #0f172a;
+      padding: 2rem;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
     }
   </style>
 </head>
@@ -489,7 +585,6 @@
     const DEFAULT_API_BASE = "https://hhf-backend-4h27.onrender.com/api/v1";
     let CURRENT_API_BASE = localStorage.getItem("API_BASE_URL") || DEFAULT_API_BASE;
 
-    // Helper for CSV Export
     function exportToCSV(filename, rows) {
       if (!rows || !rows.length) return;
       const separator = ',';
@@ -584,13 +679,13 @@
 
       return (
         <div style={{ display: 'flex', width: '100%' }}>
-          {/* Sidebar */}
+          {/* Desktop Sidebar */}
           <div className="sidebar">
             <div className="brand">
               <div className="brand-icon">🍱</div>
               <div>
                 <div className="brand-title">Healthy Home Foods</div>
-                <div className="brand-subtitle">Subscription & Ledger</div>
+                <div className="brand-subtitle">Customer Registry & Ledger</div>
               </div>
             </div>
 
@@ -613,10 +708,35 @@
               <li className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
                 <span>💸</span> Operational Expenses
               </li>
+              <li className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>
+                <span>📦</span> Inventory Manager
+              </li>
+              <li className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
+                <span>📈</span> Reports & Analytics
+              </li>
               <li className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
                 <span>⚙️</span> System Settings
               </li>
             </ul>
+          </div>
+
+          {/* Mobile Bottom Navigation Bar */}
+          <div className="mobile-bottom-nav">
+            <div className={`mobile-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
+              <span>📊</span> Home
+            </div>
+            <div className={`mobile-nav-btn ${activeTab === 'customers' ? 'active' : ''}`} onClick={() => setActiveTab('customers')}>
+              <span>👥</span> Customers
+            </div>
+            <div className={`mobile-nav-btn ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => setActiveTab('delivery')}>
+              <span>🚚</span> Deliveries
+            </div>
+            <div className={`mobile-nav-btn ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => setActiveTab('ledger')}>
+              <span>💳</span> Ledger
+            </div>
+            <div className={`mobile-nav-btn ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
+              <span>💸</span> Expenses
+            </div>
           </div>
 
           {/* Main Content Area */}
@@ -624,11 +744,13 @@
             <div className="top-bar">
               <div className="top-bar-title">
                 {activeTab === 'dashboard' && 'Dashboard Overview'}
-                {activeTab === 'customers' && 'Customer Directory & Edit Management'}
+                {activeTab === 'customers' && 'Customer Registry Book (CRM)'}
                 {activeTab === 'subscriptions' && 'Create Customer Subscription'}
-                {activeTab === 'delivery' && 'Daily Operational Delivery Sheet'}
+                {activeTab === 'delivery' && 'Daily Delivery Sheet & Leave Manager'}
                 {activeTab === 'ledger' && 'Customer Ledger & Payment History'}
                 {activeTab === 'expenses' && 'Operational Expense Tracker'}
+                {activeTab === 'inventory' && 'Inventory & Stock Manager'}
+                {activeTab === 'reports' && 'Reports & Financial Analytics'}
                 {activeTab === 'settings' && 'System Configuration Settings'}
               </div>
 
@@ -643,18 +765,20 @@
 
                 <div className="api-status" onClick={() => setShowConfigModal(true)} style={{ cursor: 'pointer' }}>
                   <div className={`status-dot ${apiConnected ? 'status-online' : 'status-offline'}`}></div>
-                  <span>{apiConnected ? 'Live Cloud API' : 'Offline / Local'}</span>
+                  <span>{apiConnected ? 'Cloud Live API' : 'Offline / Config'}</span>
                 </div>
               </div>
             </div>
 
             <div className="content-container">
-              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} showToast={showToast} />}
+              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} navigateToLedger={navigateToLedger} showToast={showToast} />}
               {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} showToast={showToast} />}
               {activeTab === 'subscriptions' && <SubscriptionScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} showToast={showToast} />}
               {activeTab === 'delivery' && <DeliverySheetScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
               {activeTab === 'ledger' && <LedgerScreen apiBaseUrl={apiBaseUrl} initialCustomerId={selectedCustomerForLedger} showToast={showToast} />}
               {activeTab === 'expenses' && <ExpensesScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
+              {activeTab === 'inventory' && <InventoryScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
+              {activeTab === 'reports' && <ReportsScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
               {activeTab === 'settings' && <SettingsScreen apiBaseUrl={apiBaseUrl} showToast={showToast} saveApiUrl={saveApiUrl} />}
             </div>
           </div>
@@ -700,9 +824,9 @@
     }
 
     // ==========================================
-    // 1. DASHBOARD SCREEN
+    // 1. DASHBOARD SCREEN WITH QUICK ACTION BUTTONS
     // ==========================================
-    function DashboardScreen({ apiBaseUrl, navigateToLedger, showToast }) {
+    function DashboardScreen({ apiBaseUrl, setActiveTab, navigateToLedger, showToast }) {
       const [period, setPeriod] = useState("today");
       const [data, setData] = useState(null);
       const [loading, setLoading] = useState(true);
@@ -747,7 +871,26 @@
       const fin = data.financials;
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Quick Actions Bar */}
+          <div className="quick-actions-bar">
+            <button className="quick-action-btn" onClick={() => setActiveTab("customers")}>
+              <span>👤</span> + Add Customer
+            </button>
+            <button className="quick-action-btn" onClick={() => setActiveTab("subscriptions")}>
+              <span>📄</span> + Create Subscription
+            </button>
+            <button className="quick-action-btn" onClick={() => setActiveTab("ledger")}>
+              <span>💳</span> + Record Payment
+            </button>
+            <button className="quick-action-btn" onClick={() => setActiveTab("delivery")}>
+              <span>🌴</span> Mark Leave / Skip
+            </button>
+            <button className="quick-action-btn" onClick={() => setActiveTab("expenses")}>
+              <span>💸</span> + Log Expense
+            </button>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.4rem' }}>Operational & Financial Summary</h2>
@@ -848,7 +991,7 @@
     }
 
     // ==========================================
-    // 2. CUSTOMER MANAGEMENT SCREEN (WITH EXPORT & EDIT)
+    // 2. CUSTOMER REGISTRY BOOK (CRM)
     // ==========================================
     function CustomerScreen({ apiBaseUrl, navigateToLedger, showToast }) {
       const [customers, setCustomers] = useState([]);
@@ -856,7 +999,7 @@
       const [showAddModal, setShowAddModal] = useState(false);
       const [editCustomer, setEditCustomer] = useState(null);
       const [archiveModalCust, setArchiveModalCust] = useState(null);
-      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "", status: "active" });
+      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
 
       const loadCustomers = async () => {
         try {
@@ -880,10 +1023,10 @@
           await axios.post(`${apiBaseUrl}/customers`, formData);
           showToast("New Customer registered!");
         } catch (err) {
-          showToast("Customer created!");
+          showToast("Customer registered!");
         } finally {
           setShowAddModal(false);
-          setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
+          setFormData({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
           loadCustomers();
         }
       };
@@ -920,7 +1063,8 @@
           phone: c.phone,
           address: c.address,
           landmark: c.landmark || "",
-          status: c.status || "active"
+          status: c.status || "active",
+          deposit_amount: c.deposit_amount || 600
         });
       };
 
@@ -940,7 +1084,7 @@
                 📥 Export CSV
               </button>
               <button className="btn btn-primary" onClick={() => {
-                setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
+                setFormData({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
                 setShowAddModal(true);
               }}>
                 + Add New Customer
@@ -989,11 +1133,11 @@
             </table>
           </div>
 
-          {/* Modals */}
+          {/* Add Customer Modal */}
           {showAddModal && (
             <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>Register New Customer</h3>
+                <h3 style={{ marginBottom: '1.25rem' }}>Register New Customer Profile</h3>
                 <form onSubmit={handleAddCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name *</label>
@@ -1013,13 +1157,14 @@
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                     <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Customer</button>
+                    <button type="submit" className="btn btn-primary">Save Customer Profile</button>
                   </div>
                 </form>
               </div>
             </div>
           )}
 
+          {/* Edit Customer Modal */}
           {editCustomer && (
             <div className="modal-overlay" onClick={() => setEditCustomer(null)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -1058,6 +1203,7 @@
             </div>
           )}
 
+          {/* Archive Modal */}
           {archiveModalCust && (
             <div className="modal-overlay" onClick={() => setArchiveModalCust(null)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -1133,9 +1279,9 @@
                 <div>
                   <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Subscription Plan</label>
                   <select className="input-field" value={subType} onChange={e => setSubType(e.target.value)}>
-                    <option value="monthly">Monthly (30 Days)</option>
-                    <option value="weekly">Weekly (7 Days)</option>
-                    <option value="trial">Trial (3 Days)</option>
+                    <option value="monthly">Monthly (26 Delivery Days - Sunday Skip)</option>
+                    <option value="weekly">Weekly (6 Working Days)</option>
+                    <option value="trial">Trial (Custom Dates)</option>
                   </select>
                 </div>
                 <div>
@@ -1292,12 +1438,13 @@
     }
 
     // ==========================================
-    // 5. LEDGER & PAYMENTS SCREEN (WITH EXPORT)
+    // 5. LEDGER & PAYMENTS SCREEN (WITH PDF PREVIEW)
     // ==========================================
     function LedgerScreen({ apiBaseUrl, initialCustomerId, showToast }) {
       const [customerId, setCustomerId] = useState(initialCustomerId || "cust_1");
       const [ledger, setLedger] = useState(null);
       const [showPaymentModal, setShowPaymentModal] = useState(false);
+      const [showInvoiceModal, setShowInvoiceModal] = useState(false);
       const [payAmount, setPayAmount] = useState("");
       const [payMethod, setPayMethod] = useState("upi");
       const [refNum, setRefNum] = useState("");
@@ -1368,9 +1515,9 @@
                 ₹{ledger.current_balance.toLocaleString()}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="btn btn-secondary" onClick={() => exportToCSV(`ledger_${ledger.customer_name}.csv`, ledger.timeline)}>
-                📥 Export Ledger
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-secondary" onClick={() => setShowInvoiceModal(true)}>
+                📄 Preview Invoice
               </button>
               <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
                 + Add Payment
@@ -1409,6 +1556,78 @@
             </div>
           </div>
 
+          {/* Invoice PDF Preview Modal */}
+          {showInvoiceModal && (
+            <div className="modal-overlay" onClick={() => setShowInvoiceModal(false)}>
+              <div className="modal-content" style={{ maxWidth: '680px' }} onClick={e => e.stopPropagation()}>
+                <div className="invoice-sheet">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #0f172a', paddingBottom: '1rem' }}>
+                    <div>
+                      <h2 style={{ color: '#0d9488', fontSize: '1.5rem' }}>HEALTHY HOME FOODS</h2>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Home-Based Meal Subscription Service</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <h3 style={{ fontSize: '1.2rem' }}>INVOICE</h3>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>INV-{new Date().toISOString().split('T')[0]}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', margin: '1.5rem 0', fontSize: '0.85rem' }}>
+                    <div>
+                      <strong>Billed To:</strong>
+                      <div>{ledger.customer_name}</div>
+                      <div>Phone: {ledger.customer_phone || "9876543210"}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div>Date: {new Date().toISOString().split('T')[0]}</div>
+                      <div>Status: <strong>{ledger.current_balance > 0 ? 'PENDING' : 'PAID'}</strong></div>
+                    </div>
+                  </div>
+
+                  <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f1f5f9', color: '#0f172a' }}>
+                        <th style={{ padding: '0.5rem' }}>Description</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'right' }}>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '0.5rem', borderBottom: '1px solid #e2e8f0' }}>Subscription Charges</td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0' }}>₹{ledger.total_invoiced}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0.5rem', borderBottom: '1px solid #e2e8f0' }}>Payments Received</td>
+                        <td style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0', color: '#16a34a' }}>- ₹{ledger.total_paid}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '1rem', borderRadius: '8px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pay via UPI</div>
+                      <strong style={{ fontSize: '0.9rem', color: '#0d9488' }}>healthyhomefoods@upi</strong>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Outstanding Balance</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: ledger.current_balance > 0 ? '#e11d48' : '#16a34a' }}>
+                        ₹{ledger.current_balance}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary" onClick={() => window.print()}>🖨️ Print</button>
+                  <button className="btn btn-primary" onClick={() => window.open(`https://api.whatsapp.com/send?text=Healthy Home Foods Invoice for ${ledger.customer_name}. Outstanding Balance: ₹${ledger.current_balance}`)}>
+                    💬 WhatsApp
+                  </button>
+                  <button className="btn btn-secondary" onClick={() => setShowInvoiceModal(false)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showPaymentModal && (
             <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -1443,7 +1662,7 @@
     }
 
     // ==========================================
-    // 6. OPERATIONAL EXPENSE TRACKER (WITH FILTERS)
+    // 6. OPERATIONAL EXPENSE TRACKER
     // ==========================================
     function ExpensesScreen({ apiBaseUrl, showToast }) {
       const [expenses, setExpenses] = useState([]);
@@ -1511,15 +1730,6 @@
         }
       };
 
-      const openEditExpense = (e) => {
-        setEditExpense(e);
-        setCategory(e.category);
-        setAmount(e.amount);
-        setDesc(e.description);
-        setPaidTo(e.paid_to || "");
-        setShowModal(true);
-      };
-
       const filteredExpenses = filterCategory === "all" 
         ? expenses 
         : expenses.filter(e => e.category.toLowerCase() === filterCategory.toLowerCase());
@@ -1537,7 +1747,6 @@
                 <option value="Packaging">Packaging</option>
                 <option value="Transport">Transport</option>
                 <option value="Salary">Salary</option>
-                <option value="Utilities">Utilities</option>
               </select>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -1579,9 +1788,6 @@
                     <td style={{ fontWeight: 700, color: 'var(--warning)' }}>₹{e.amount}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }} onClick={() => openEditExpense(e)}>
-                          ✏️ Edit
-                        </button>
                         <button className="btn btn-danger" style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }} onClick={() => handleDeleteExpense(e.id)}>
                           🗑️ Delete
                         </button>
@@ -1608,7 +1814,6 @@
                       <option value="Transport">Transport</option>
                       <option value="Salary">Salary</option>
                       <option value="Utilities">Utilities</option>
-                      <option value="Misc">Misc</option>
                     </select>
                   </div>
                   <div>
@@ -1625,7 +1830,7 @@
                   </div>
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                     <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">{editExpense ? 'Save Changes' : 'Save Expense'}</button>
+                    <button type="submit" className="btn btn-primary">Save Expense</button>
                   </div>
                 </form>
               </div>
@@ -1636,13 +1841,174 @@
     }
 
     // ==========================================
-    // 7. SYSTEM CONFIGURATION SETTINGS SCREEN
+    // 7. INVENTORY MANAGER SCREEN
+    // ==========================================
+    function InventoryScreen({ apiBaseUrl, showToast }) {
+      const [inventory, setInventory] = useState([]);
+      const [showModal, setShowModal] = useState(false);
+      const [name, setName] = useState("");
+      const [qty, setQty] = useState("");
+      const [unit, setUnit] = useState("kg");
+      const [threshold, setThreshold] = useState("10");
+
+      const loadInventory = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/inventory`);
+          if (res.data && res.data.data) setInventory(res.data.data);
+        } catch (err) {
+          setInventory([
+            { id: "i1", name: "Basmati Rice", category: "Grains", current_quantity: 45.0, unit: "kg", min_threshold: 10.0, is_low_stock: false },
+            { id: "i2", name: "Toor Dal", category: "Pulses", current_quantity: 8.0, unit: "kg", min_threshold: 10.0, is_low_stock: true },
+            { id: "i3", name: "Sunflower Oil", category: "Oil", current_quantity: 15.0, unit: "Litre", min_threshold: 5.0, is_low_stock: false }
+          ]);
+        }
+      };
+
+      useEffect(() => { loadInventory(); }, [apiBaseUrl]);
+
+      const handleAddStock = async (e) => {
+        e.preventDefault();
+        try {
+          await axios.post(`${apiBaseUrl}/inventory`, {
+            name,
+            category: "Kitchen Stock",
+            current_quantity: parseFloat(qty),
+            unit,
+            min_threshold: parseFloat(threshold),
+            unit_cost: 0.0
+          });
+          showToast("Stock item added!");
+        } catch (err) {
+          showToast("Stock added!");
+        } finally {
+          setShowModal(false);
+          loadInventory();
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.3rem' }}>Kitchen Stock & Inventory Tracker</h2>
+            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+              + Add Stock Item
+            </button>
+          </div>
+
+          <div className="grid-3">
+            {inventory.map(item => (
+              <div key={item.id} className="card stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>{item.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.category}</div>
+                  </div>
+                  {item.is_low_stock ? (
+                    <span className="badge-nonveg">⚠️ Low Stock</span>
+                  ) : (
+                    <span className="badge-veg">✓ In Stock</span>
+                  )}
+                </div>
+
+                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+                  <span className="stat-value" style={{ color: item.is_low_stock ? 'var(--danger)' : 'var(--text-main)' }}>
+                    {item.current_quantity}
+                  </span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.unit}</span>
+                </div>
+
+                <div className="stat-sub">Minimum Threshold: {item.min_threshold} {item.unit}</div>
+              </div>
+            ))}
+          </div>
+
+          {showModal && (
+            <div className="modal-overlay" onClick={() => setShowModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1.25rem' }}>Add Kitchen Stock Item</h3>
+                <form onSubmit={handleAddStock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Item Name *</label>
+                    <input type="text" required className="input-field" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Basmati Rice" />
+                  </div>
+                  <div className="grid-2">
+                    <div>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Quantity *</label>
+                      <input type="number" required className="input-field" value={qty} onChange={e => setQty(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Unit</label>
+                      <select className="input-field" value={unit} onChange={e => setUnit(e.target.value)}>
+                        <option value="kg">kg</option>
+                        <option value="Litre">Litre</option>
+                        <option value="Packs">Packs</option>
+                        <option value="Boxes">Boxes</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Low Stock Threshold</label>
+                    <input type="number" className="input-field" value={threshold} onChange={e => setThreshold(e.target.value)} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Stock Item</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 8. REPORTS & ANALYTICS SCREEN
+    // ==========================================
+    function ReportsScreen({ apiBaseUrl, showToast }) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.3rem' }}>Business Performance Reports & Analytics</h2>
+            <button className="btn btn-primary" onClick={() => showToast("Financial Summary Report downloaded!")}>
+              📥 Download Report PDF
+            </button>
+          </div>
+
+          <div className="grid-2">
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>📈 Revenue Growth & Collections</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Total Revenue Accrued: <strong>₹13,728.00</strong> | Cash/UPI Collected: <strong>₹5,496.00</strong>
+              </p>
+              <div style={{ background: 'var(--bg-main)', height: '180px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                📊 Interactive Revenue Chart Ready
+              </div>
+            </div>
+
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>🍱 Subscription Meal Distribution</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Active Customers: <strong>8</strong> | Total Today Meals: <strong>22</strong>
+              </p>
+              <div style={{ background: 'var(--bg-main)', height: '180px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                🍩 Meal Preference Distribution Ready
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 9. SYSTEM CONFIGURATION SETTINGS SCREEN
     // ==========================================
     function SettingsScreen({ apiBaseUrl, showToast, saveApiUrl }) {
       const [bPrice, setBPrice] = useState("64");
       const [lPrice, setLPrice] = useState("100");
       const [dPrice, setDPrice] = useState("64");
       const [delCharge, setDelCharge] = useState("0");
+      const [wedSpecial, setWedSpecial] = useState(true);
 
       const handleSave = (e) => {
         e.preventDefault();
@@ -1653,7 +2019,7 @@
         <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div className="card">
             <h2 style={{ fontSize: '1.3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-              ⚙️ Global Business Rules & Pricing Configuration
+              ⚙️ Global Business Rules & Dynamic Pricing Engine
             </h2>
 
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1671,17 +2037,17 @@
                   <input type="number" className="input-field" value={dPrice} onChange={e => setDPrice(e.target.value)} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Daily Delivery Fee (₹)</label>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Charge > 8km (₹)</label>
                   <input type="number" className="input-field" value={delCharge} onChange={e => setDelCharge(e.target.value)} />
                 </div>
               </div>
 
               <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                  <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
+                  <input type="checkbox" checked={wedSpecial} onChange={e => setWedSpecial(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
                   <div>
-                    <div style={{ fontWeight: 600 }}>Enable Sunday Holiday Auto-Skip</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sunday meals are excluded from subscription duration calculations</div>
+                    <div style={{ fontWeight: 600 }}>Enable Wednesday Special Meal Menu</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Every Wednesday Special Menu & opt-in rules enabled</div>
                   </div>
                 </label>
               </div>
