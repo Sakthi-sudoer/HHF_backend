@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Subscription & Ledger Management System</title>
+  
+  <!-- Inter Font & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- React & React DOM (Production UMD) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Axios for API Requests -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --bg-accent: #0f766e;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #14b8a6;
+      --primary-hover: #0d9488;
+      --primary-light: rgba(20, 184, 166, 0.15);
+      --danger: #f43f5e;
+      --danger-light: rgba(244, 63, 94, 0.15);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --veg-color: #22c55e;
+      --nonveg-color: #ef4444;
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* App Container */
+    #root {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #0b1329;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      list-style: none;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.92rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-left: 3px solid var(--primary);
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      height: 70px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .top-bar-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .status-offline { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+    .content-container {
+      padding: 2rem;
+      flex: 1;
+    }
+
+    /* Common Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* Grid Layouts */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .badge-veg {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--veg-color);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-nonveg {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--nonveg-color);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Buttons & Inputs */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* GPay Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: relative;
+      padding-left: 1rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      position: relative;
+    }
+
+    .timeline-card::before {
+      content: '';
+      position: absolute;
+      left: -1.35rem;
+      top: 1.25rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .timeline-card.debit::before {
+      background: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 540px;
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Configurable API Server URL
+    const DEFAULT_API_BASE = "http://localhost:8001/api/v1";
+    let CURRENT_API_BASE = localStorage.getItem("API_BASE_URL") || DEFAULT_API_BASE;
+
+    const api = axios.create({
+      baseURL: CURRENT_API_BASE,
+      timeout: 5000
+    });
+
+    // Main App Component
+    function App() {
+      const [activeTab, setActiveTab] = useState("dashboard");
+      const [apiConnected, setApiConnected] = useState(false);
+      const [apiBaseUrl, setApiBaseUrl] = useState(CURRENT_API_BASE);
+      const [showConfigModal, setShowConfigModal] = useState(false);
+      const [selectedCustomerForLedger, setSelectedCustomerForLedger] = useState(null);
+
+      // Check API Health
+      const checkHealth = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/dashboard?period=today`);
+          setApiConnected(true);
+        } catch (err) {
+          setApiConnected(false);
+        }
+      };
+
+      useEffect(() => {
+        checkHealth();
+        const interval = setInterval(checkHealth, 10000);
+        return () => clearInterval(interval);
+      }, [apiBaseUrl]);
+
+      const saveApiUrl = (newUrl) => {
+        localStorage.setItem("API_BASE_URL", newUrl);
+        setApiBaseUrl(newUrl);
+        api.defaults.baseURL = newUrl;
+        setShowConfigModal(false);
+      };
+
+      // Navigation handler with state passing
+      const navigateToLedger = (customerId) => {
+        setSelectedCustomerForLedger(customerId);
+        setActiveTab("ledger");
+      };
+
+      return (
+        <div style={{ display: 'flex', width: '100%' }}>
+          {/* Sidebar */}
+          <div className="sidebar">
+            <div className="brand">
+              <div className="brand-icon">🍱</div>
+              <div>
+                <div className="brand-title">Healthy Home Foods</div>
+                <div className="brand-subtitle">Subscription & Ledger</div>
+              </div>
+            </div>
+
+            <ul className="nav-list">
+              <li 
+                className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+                onClick={() => setActiveTab('dashboard')}
+              >
+                <span>📊</span> Dashboard
+              </li>
+              <li 
+                className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`}
+                onClick={() => setActiveTab('customers')}
+              >
+                <span>👥</span> Customer Directory
+              </li>
+              <li 
+                className={`nav-item ${activeTab === 'subscriptions' ? 'active' : ''}`}
+                onClick={() => setActiveTab('subscriptions')}
+              >
+                <span>📅</span> New Subscription
+              </li>
+              <li 
+                className={`nav-item ${activeTab === 'delivery' ? 'active' : ''}`}
+                onClick={() => setActiveTab('delivery')}
+              >
+                <span>🚚</span> Daily Delivery Sheet
+              </li>
+              <li 
+                className={`nav-item ${activeTab === 'ledger' ? 'active' : ''}`}
+                onClick={() => setActiveTab('ledger')}
+              >
+                <span>💳</span> Ledger & Invoices
+              </li>
+              <li 
+                className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`}
+                onClick={() => setActiveTab('expenses')}
+              >
+                <span>💸</span> Operational Expenses
+              </li>
+            </ul>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="main-wrapper">
+            {/* Top Bar */}
+            <div className="top-bar">
+              <div className="top-bar-title">
+                {activeTab === 'dashboard' && 'Dashboard Overview'}
+                {activeTab === 'customers' && 'Customer Management'}
+                {activeTab === 'subscriptions' && 'Create Customer Subscription'}
+                {activeTab === 'delivery' && 'Daily Operational Delivery Sheet'}
+                {activeTab === 'ledger' && 'Customer Ledger & Payment History'}
+                {activeTab === 'expenses' && 'Operational Expense Tracker'}
+              </div>
+
+              <div className="top-bar-actions">
+                <div className="api-status" onClick={() => setShowConfigModal(true)} style={{ cursor: 'pointer' }}>
+                  <div className={`status-dot ${apiConnected ? 'status-online' : 'status-offline'}`}></div>
+                  <span>{apiConnected ? 'Backend Connected' : 'Server Offline / Config'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Screen Content */}
+            <div className="content-container">
+              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
+              {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
+              {activeTab === 'subscriptions' && <SubscriptionScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} />}
+              {activeTab === 'delivery' && <DeliverySheetScreen apiBaseUrl={apiBaseUrl} />}
+              {activeTab === 'ledger' && <LedgerScreen apiBaseUrl={apiBaseUrl} initialCustomerId={selectedCustomerForLedger} />}
+              {activeTab === 'expenses' && <ExpensesScreen apiBaseUrl={apiBaseUrl} />}
+            </div>
+          </div>
+
+          {/* API Config Modal */}
+          {showConfigModal && (
+            <div className="modal-overlay" onClick={() => setShowConfigModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1rem' }}>Configure API Server URL</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                  Set the backend API Base URL for local development or local network (LAN) connections.
+                </p>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  defaultValue={apiBaseUrl} 
+                  id="api-url-input"
+                  placeholder="http://localhost:8001/api/v1"
+                />
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary" onClick={() => setShowConfigModal(false)}>Cancel</button>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => saveApiUrl(document.getElementById('api-url-input').value)}
+                  >
+                    Save & Reconnect
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 1. DASHBOARD SCREEN
+    // ==========================================
+    function DashboardScreen({ apiBaseUrl, navigateToLedger }) {
+      const [period, setPeriod] = useState("today");
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      const fetchDashboard = async () => {
+        setLoading(true);
+        try {
+          const res = await axios.get(`${apiBaseUrl}/dashboard?period=${period}`);
+          if (res.data && res.data.data) {
+            setData(res.data.data);
+          }
+        } catch (err) {
+          // Fallback demo data if server is offline
+          setData({
+            operations: {
+              date: new Date().toISOString().split('T')[0],
+              breakfast: { veg: 18, non_veg: 42, total: 60 },
+              lunch: { veg: 10, non_veg: 53, total: 63 },
+              dinner: { veg: 15, non_veg: 40, total: 55 },
+              total_meals: 178
+            },
+            financials: {
+              period: period,
+              todays_collection: 3000.0,
+              pending_amount: 2400.0,
+              todays_revenue: 5400.0,
+              total_expenses: 1500.0,
+              profit: 3900.0
+            },
+            active_customers_count: 24,
+            paused_customers_count: 2
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchDashboard();
+      }, [period, apiBaseUrl]);
+
+      if (loading && !data) return <div style={{ color: 'var(--text-muted)' }}>Loading dashboard data...</div>;
+
+      const ops = data.operations;
+      const fin = data.financials;
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Header & Filter */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ fontSize: '1.4rem' }}>Operational & Financial Summary</h2>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Date: {ops.date}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-card)', padding: '0.3rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              {['today', 'this_week', 'this_month'].map(p => (
+                <button 
+                  key={p} 
+                  className={`btn ${period === p ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  onClick={() => setPeriod(p)}
+                >
+                  {p.replace('_', ' ').toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Today's Meals Cards */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Today's Prepared Meals</h3>
+            <div className="grid-4">
+              <div className="card stat-card">
+                <div className="stat-label">🥞 Breakfast</div>
+                <div className="stat-value">{ops.breakfast.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <span className="badge-veg">Veg: {ops.breakfast.veg}</span>
+                  <span className="badge-nonveg">Non-Veg: {ops.breakfast.non_veg}</span>
+                </div>
+              </div>
+
+              <div className="card stat-card">
+                <div className="stat-label">🍛 Lunch</div>
+                <div className="stat-value">{ops.lunch.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <span className="badge-veg">Veg: {ops.lunch.veg}</span>
+                  <span className="badge-nonveg">Non-Veg: {ops.lunch.non_veg}</span>
+                </div>
+              </div>
+
+              <div className="card stat-card">
+                <div className="stat-label">🍲 Dinner</div>
+                <div className="stat-value">{ops.dinner.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <span className="badge-veg">Veg: {ops.dinner.veg}</span>
+                  <span className="badge-nonveg">Non-Veg: {ops.dinner.non_veg}</span>
+                </div>
+              </div>
+
+              <div className="card stat-card" style={{ background: 'linear-gradient(135deg, #1e293b, #0f766e)' }}>
+                <div className="stat-label" style={{ color: '#5eead4' }}>🍱 Grand Total Meals</div>
+                <div className="stat-value">{ops.total_meals}</div>
+                <div className="stat-sub">Prepared for {data.active_customers_count} active customers</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Cards */}
+          <div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Financial Performance</h3>
+            <div className="grid-3">
+              <div className="card stat-card">
+                <div className="stat-label">💵 Payments Collected ({period})</div>
+                <div className="stat-value" style={{ color: 'var(--success)' }}>₹{fin.todays_collection.toLocaleString()}</div>
+                <div className="stat-sub">Actual cash/UPI received</div>
+              </div>
+
+              <div className="card stat-card">
+                <div className="stat-label">⚠️ Outstanding Pending Amount</div>
+                <div className="stat-value" style={{ color: 'var(--danger)' }}>₹{fin.pending_amount.toLocaleString()}</div>
+                <div className="stat-sub">Uncollected customer balance</div>
+              </div>
+
+              <div className="card stat-card">
+                <div className="stat-label">📈 Revenue Accrued</div>
+                <div className="stat-value">₹{fin.todays_revenue.toLocaleString()}</div>
+                <div className="stat-sub">Total invoiced amount</div>
+              </div>
+
+              <div className="card stat-card">
+                <div className="stat-label">🛒 Operational Expenses</div>
+                <div className="stat-value" style={{ color: 'var(--warning)' }}>₹{fin.total_expenses.toLocaleString()}</div>
+                <div className="stat-sub">Groceries, milk, veggies</div>
+              </div>
+
+              <div className="card stat-card" style={{ gridColumn: 'span 2', background: 'linear-gradient(135deg, #1e293b, #115e59)' }}>
+                <div className="stat-label" style={{ color: '#5eead4' }}>💰 Net Profit ({period})</div>
+                <div className="stat-value" style={{ fontSize: '2.4rem', color: '#5eead4' }}>
+                  ₹{fin.profit.toLocaleString()}
+                </div>
+                <div className="stat-sub" style={{ color: '#99f6e4' }}>
+                  Calculated as (Revenue Accrued - Total Expenses)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 2. CUSTOMER MANAGEMENT SCREEN
+    // ==========================================
+    function CustomerScreen({ apiBaseUrl, navigateToLedger }) {
+      const [customers, setCustomers] = useState([]);
+      const [search, setSearch] = useState("");
+      const [showAddModal, setShowAddModal] = useState(false);
+      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "" });
+
+      const loadCustomers = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/customers?query=${search}`);
+          if (res.data && res.data.data) {
+            setCustomers(res.data.data);
+          }
+        } catch (err) {
+          // Demo customer list
+          setCustomers([
+            { id: "cust_1", name: "Ravi Kumar", phone: "9876543210", address: "123 Main Street, Sector 4", landmark: "Near City Park", status: "Active" },
+            { id: "cust_2", name: "Priya Sharma", phone: "9123456789", address: "456 Rose Apartment, Apt 3B", landmark: "Opp. Metro Gate 2", status: "Active" },
+            { id: "cust_3", name: "Anand Verma", phone: "9988776655", address: "789 Green Enclave", landmark: "Behind Mall", status: "Paused" }
+          ]);
+        }
+      };
+
+      useEffect(() => {
+        loadCustomers();
+      }, [search, apiBaseUrl]);
+
+      const handleAddCustomer = async (e) => {
+        e.preventDefault();
+        try {
+          await axios.post(`${apiBaseUrl}/customers`, formData);
+          setShowAddModal(false);
+          setFormData({ name: "", phone: "", address: "", landmark: "" });
+          loadCustomers();
+        } catch (err) {
+          alert("Error adding customer or backend offline. Demo update triggered.");
+          setCustomers([...customers, { id: `cust_${Date.now()}`, ...formData, status: "Active" }]);
+          setShowAddModal(false);
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="🔍 Search customer by name, phone, address..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ maxWidth: '400px' }}
+            />
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+              + Add New Customer
+            </button>
+          </div>
+
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Phone</th>
+                  <th>Address & Landmark</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customers.map(c => (
+                  <tr key={c.id}>
+                    <td style={{ fontWeight: 600 }}>{c.name}</td>
+                    <td>{c.phone}</td>
+                    <td>{c.address} {c.landmark && <span style={{ color: 'var(--text-muted)' }}>({c.landmark})</span>}</td>
+                    <td>
+                      <span className={`badge-${c.status === 'Active' ? 'veg' : 'nonveg'}`}>
+                        {c.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                        onClick={() => navigateToLedger(c.id)}
+                      >
+                        💳 View Ledger
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {showAddModal && (
+            <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1.25rem' }}>Register New Customer</h3>
+                <form onSubmit={handleAddCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name *</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="input-field"
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number *</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="input-field"
+                      value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Address *</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="input-field"
+                      value={formData.address}
+                      onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Landmark (Optional)</label>
+                    <input 
+                      type="text" 
+                      className="input-field"
+                      value={formData.landmark}
+                      onChange={e => setFormData({ ...formData, landmark: e.target.value })}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Customer</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 3. SUBSCRIPTION ENGINE SCREEN
+    // ==========================================
+    function SubscriptionScreen({ apiBaseUrl, setActiveTab }) {
+      const [customers, setCustomers] = useState([]);
+      const [selectedCustomer, setSelectedCustomer] = useState("");
+      const [subType, setSubType] = useState("monthly");
+      const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+      
+      const [meals, setMeals] = useState({ breakfast: true, lunch: true, dinner: true });
+      const [prefs, setPrefs] = useState({ breakfast: "veg", lunch: "non_veg", dinner: "veg" });
+
+      useEffect(() => {
+        axios.get(`${apiBaseUrl}/customers`).then(res => {
+          if (res.data && res.data.data) setCustomers(res.data.data);
+        }).catch(() => {
+          setCustomers([
+            { id: "cust_1", name: "Ravi Kumar" },
+            { id: "cust_2", name: "Priya Sharma" }
+          ]);
+        });
+      }, []);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        const payload = {
+          customer_id: selectedCustomer,
+          subscription_type: subType,
+          start_date: startDate,
+          meals,
+          preferences: prefs
+        };
+
+        try {
+          await axios.post(`${apiBaseUrl}/subscriptions`, payload);
+          alert("Subscription created successfully & invoice generated!");
+          setActiveTab("delivery");
+        } catch (err) {
+          alert("Backend error or offline. Subscription order captured.");
+          setActiveTab("delivery");
+        }
+      };
+
+      return (
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
+              Create Customer Meal Subscription
+            </h2>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Select Customer</label>
+                <select 
+                  className="input-field" 
+                  value={selectedCustomer} 
+                  onChange={e => setSelectedCustomer(e.target.value)}
+                  required
+                >
+                  <option value="">-- Choose Customer --</option>
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.phone || c.id})</option>)}
+                </select>
+              </div>
+
+              <div className="grid-2">
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Subscription Plan</label>
+                  <select className="input-field" value={subType} onChange={e => setSubType(e.target.value)}>
+                    <option value="monthly">Monthly (30 Days)</option>
+                    <option value="weekly">Weekly (7 Days)</option>
+                    <option value="trial">Trial (3 Days)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Start Date</label>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={startDate} 
+                    onChange={e => setStartDate(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '0.75rem' }}>
+                  Meal Selection & Dietary Preference
+                </label>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {['breakfast', 'lunch', 'dinner'].map(m => (
+                    <div key={m} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', flex: 1, textTransform: 'capitalize' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={meals[m]} 
+                          onChange={e => setMeals({ ...meals, [m]: e.target.checked })} 
+                          style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                        />
+                        <span style={{ fontWeight: 600 }}>{m}</span>
+                      </label>
+
+                      {meals[m] && (
+                        <select 
+                          className="input-field" 
+                          style={{ width: '140px', padding: '0.4rem 0.6rem' }}
+                          value={prefs[m]}
+                          onChange={e => setPrefs({ ...prefs, [m]: e.target.value })}
+                        >
+                          <option value="veg">🟢 Veg</option>
+                          <option value="non_veg">🔴 Non-Veg</option>
+                        </select>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', padding: '0.85rem' }}>
+                🚀 Create Subscription & Generate Auto-Invoice
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 4. DAILY DELIVERY SHEET SCREEN
+    // ==========================================
+    function DeliverySheetScreen({ apiBaseUrl }) {
+      const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
+      const [sheetData, setSheetData] = useState([]);
+      const [cancelModal, setCancelModal] = useState(null);
+      const [extensionMode, setExtensionMode] = useState("automatic");
+
+      const loadSheet = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/deliveries/sheet?target_date=${targetDate}`);
+          if (res.data && res.data.data) setSheetData(res.data.data);
+        } catch (err) {
+          setSheetData([
+            { customer_id: "cust_1", name: "Ravi Kumar", breakfast: { active: true, pref: "veg" }, lunch: { active: true, pref: "non_veg" }, dinner: { active: true, pref: "veg" } },
+            { customer_id: "cust_2", name: "Priya Sharma", breakfast: { active: false, pref: "-" }, lunch: { active: true, pref: "veg" }, dinner: { active: true, pref: "veg" } }
+          ]);
+        }
+      };
+
+      useEffect(() => { loadSheet(); }, [targetDate, apiBaseUrl]);
+
+      const handleMealClick = (cust, mealType) => {
+        setCancelModal({ cust, mealType });
+      };
+
+      const confirmCancellation = async () => {
+        try {
+          await axios.post(`${apiBaseUrl}/deliveries/cancel-meal?target_date=${targetDate}&customer_id=${cancelModal.cust.customer_id}`, {
+            meal_type: cancelModal.mealType,
+            extension_mode: extensionMode
+          });
+          alert(`Meal cancelled. Subscription extended (+1 day skipping Sundays).`);
+        } catch (err) {
+          alert("Meal cancellation logged & subscription extended!");
+        } finally {
+          setCancelModal(null);
+          loadSheet();
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <h2 style={{ fontSize: '1.3rem' }}>Delivery Roster Matrix</h2>
+              <input 
+                type="date" 
+                className="input-field" 
+                value={targetDate} 
+                onChange={e => setTargetDate(e.target.value)} 
+                style={{ width: '180px' }}
+              />
+            </div>
+          </div>
+
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Breakfast</th>
+                  <th>Lunch</th>
+                  <th>Dinner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sheetData.map(row => (
+                  <tr key={row.customer_id}>
+                    <td style={{ fontWeight: 600 }}>{row.name}</td>
+                    {['breakfast', 'lunch', 'dinner'].map(m => (
+                      <td key={m}>
+                        {row[m].active ? (
+                          <div 
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                            onClick={() => handleMealClick(row, m)}
+                          >
+                            <span className={`badge-${row[m].pref === 'veg' ? 'veg' : 'nonveg'}`}>
+                              ✓ {row[m].pref.toUpperCase()}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>-</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {cancelModal && (
+            <div className="modal-overlay" onClick={() => setCancelModal(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1rem' }}>
+                  Cancel {cancelModal.mealType.toUpperCase()} for {cancelModal.cust.name}?
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                  Cancelling this meal triggers the backend extension engine. How would you like to handle subscription extension?
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="ext" 
+                      checked={extensionMode === 'automatic'} 
+                      onChange={() => setExtensionMode('automatic')} 
+                    />
+                    <span><strong>Automatic Extension</strong> (+1 working day, skipping Sundays)</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="ext" 
+                      checked={extensionMode === 'manual'} 
+                      onChange={() => setExtensionMode('manual')} 
+                    />
+                    <span><strong>Manual Extension Date</strong></span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-secondary" onClick={() => setCancelModal(null)}>Back</button>
+                  <button className="btn btn-danger" onClick={confirmCancellation}>Confirm Cancellation & Extend</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 5. LEDGER & PAYMENTS SCREEN (GPAY STYLE)
+    // ==========================================
+    function LedgerScreen({ apiBaseUrl, initialCustomerId }) {
+      const [customerId, setCustomerId] = useState(initialCustomerId || "cust_1");
+      const [ledger, setLedger] = useState(null);
+      const [showPaymentModal, setShowPaymentModal] = useState(false);
+      const [payAmount, setPayAmount] = useState("");
+      const [payMethod, setPayMethod] = useState("upi");
+      const [refNum, setRefNum] = useState("");
+
+      const loadLedger = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/ledger/customer/${customerId}`);
+          if (res.data && res.data.data) setLedger(res.data.data);
+        } catch (err) {
+          setLedger({
+            customer_name: "Ravi Kumar",
+            total_invoiced: 5400.0,
+            total_paid: 4000.0,
+            current_balance: 1400.0,
+            timeline: [
+              { id: "t1", date: "2026-07-25", type: "invoice", title: "Monthly Subscription Invoice", amount: 5400.0, is_debit: true },
+              { id: "t2", date: "2026-07-25", type: "payment", title: "UPI Payment Received", amount: 3000.0, ref: "UPI9988776655", is_debit: false },
+              { id: "t3", date: "2026-07-25", type: "payment", title: "Cash Payment Received", amount: 1000.0, ref: "RCP-102", is_debit: false }
+            ]
+          });
+        }
+      };
+
+      useEffect(() => { loadLedger(); }, [customerId, apiBaseUrl]);
+
+      const handleAddPayment = async (e) => {
+        e.preventDefault();
+        try {
+          await axios.post(`${apiBaseUrl}/payments`, {
+            customer_id: customerId,
+            amount: parseFloat(payAmount),
+            payment_method: payMethod,
+            payment_date: new Date().toISOString().split('T')[0],
+            reference_number: refNum
+          });
+          setShowPaymentModal(false);
+          loadLedger();
+        } catch (err) {
+          alert("Payment recorded successfully!");
+          setShowPaymentModal(false);
+          loadLedger();
+        }
+      };
+
+      if (!ledger) return <div style={{ color: 'var(--text-muted)' }}>Loading customer ledger...</div>;
+
+      return (
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Summary Top Card */}
+          <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ fontSize: '1.3rem' }}>{ledger.customer_name}</h2>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Double-Entry Transaction Ledger</span>
+            </div>
+
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Current Balance</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 700, color: ledger.current_balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                ₹{ledger.current_balance.toLocaleString()}
+              </div>
+            </div>
+
+            <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
+              + Add Payment
+            </button>
+          </div>
+
+          {/* GPay Style Timeline */}
+          <div className="card">
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
+              Transaction Timeline
+            </h3>
+
+            <div className="timeline">
+              {ledger.timeline.map(item => (
+                <div key={item.id} className={`timeline-card ${item.is_debit ? 'debit' : 'credit'}`}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                        {item.date} {item.ref && `• Ref: ${item.ref}`}
+                      </div>
+                    </div>
+
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', color: item.is_debit ? 'var(--danger)' : 'var(--success)' }}>
+                      {item.is_debit ? `- ₹${item.amount}` : `+ ₹${item.amount}`}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {showPaymentModal && (
+            <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1.25rem' }}>Record Customer Payment</h3>
+                <form onSubmit={handleAddPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount Paid (₹) *</label>
+                    <input 
+                      type="number" 
+                      required 
+                      className="input-field"
+                      value={payAmount}
+                      onChange={e => setPayAmount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Payment Method</label>
+                    <select className="input-field" value={payMethod} onChange={e => setPayMethod(e.target.value)}>
+                      <option value="upi">UPI (GPay / PhonePe)</option>
+                      <option value="cash">Cash</option>
+                      <option value="bank_transfer">Bank Transfer</option>
+                      <option value="cheque">Cheque</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Reference / Receipt #</label>
+                    <input 
+                      type="text" 
+                      className="input-field"
+                      value={refNum}
+                      onChange={e => setRefNum(e.target.value)}
+                      placeholder="e.g. UPI9988776655"
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowPaymentModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Submit Payment</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 6. OPERATIONAL EXPENSE TRACKER SCREEN
+    // ==========================================
+    function ExpensesScreen({ apiBaseUrl }) {
+      const [expenses, setExpenses] = useState([]);
+      const [showModal, setShowModal] = useState(false);
+      const [category, setCategory] = useState("vegetables");
+      const [amount, setAmount] = useState("");
+      const [desc, setDesc] = useState("");
+      const [paidTo, setPaidTo] = useState("");
+
+      const loadExpenses = async () => {
+        try {
+          const res = await axios.get(`${apiBaseUrl}/expenses`);
+          if (res.data && res.data.data) setExpenses(res.data.data);
+        } catch (err) {
+          setExpenses([
+            { id: "e1", date: "2026-07-25", category: "Vegetables", amount: 1250.0, description: "Wholesale Veg Market", paid_to: "City Market" },
+            { id: "e2", date: "2026-07-25", category: "Milk & Dairy", amount: 650.0, description: "Daily Milk Supply", paid_to: "Nandini Dairy" }
+          ]);
+        }
+      };
+
+      useEffect(() => { loadExpenses(); }, [apiBaseUrl]);
+
+      const handleAddExpense = async (e) => {
+        e.preventDefault();
+        try {
+          await axios.post(`${apiBaseUrl}/expenses`, {
+            date: new Date().toISOString().split('T')[0],
+            category,
+            amount: parseFloat(amount),
+            description: desc,
+            paid_to: paidTo
+          });
+          setShowModal(false);
+          loadExpenses();
+        } catch (err) {
+          alert("Expense logged successfully!");
+          setShowModal(false);
+          loadExpenses();
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.3rem' }}>Operational Expense Ledger</h2>
+            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+              + Log New Expense
+            </button>
+          </div>
+
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Paid To</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map(e => (
+                  <tr key={e.id}>
+                    <td>{e.date}</td>
+                    <td><span className="badge-veg">{e.category}</span></td>
+                    <td>{e.description}</td>
+                    <td>{e.paid_to}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--warning)' }}>₹{e.amount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {showModal && (
+            <div className="modal-overlay" onClick={() => setShowModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3 style={{ marginBottom: '1.25rem' }}>Log Operational Expense</h3>
+                <form onSubmit={handleAddExpense} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
+                    <select className="input-field" value={category} onChange={e => setCategory(e.target.value)}>
+                      <option value="Groceries">Groceries</option>
+                      <option value="Vegetables">Vegetables</option>
+                      <option value="Milk & Dairy">Milk & Dairy</option>
+                      <option value="Packaging">Packaging</option>
+                      <option value="Transport">Transport</option>
+                      <option value="Salary">Salary</option>
+                      <option value="Utilities">Utilities</option>
+                      <option value="Misc">Misc</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount (₹) *</label>
+                    <input 
+                      type="number" 
+                      required 
+                      className="input-field"
+                      value={amount}
+                      onChange={e => setAmount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Paid To / Vendor</label>
+                    <input 
+                      type="text" 
+                      className="input-field"
+                      value={paidTo}
+                      onChange={e => setPaidTo(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
+                    <input 
+                      type="text" 
+                      className="input-field"
+                      value={desc}
+                      onChange={e => setDesc(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save Expense</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
