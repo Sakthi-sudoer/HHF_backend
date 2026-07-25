@@ -19,20 +19,41 @@ def init_firestore():
         else:
             cred = None
             # Option 1: Parse from FIREBASE_CREDENTIALS_JSON Environment Variable (Cloud Deployment)
-            if settings.FIREBASE_CREDENTIALS_JSON:
+            raw_json = settings.FIREBASE_CREDENTIALS_JSON or os.environ.get("FIREBASE_CREDENTIALS_JSON")
+            if raw_json:
                 try:
-                    cred_dict = json.loads(settings.FIREBASE_CREDENTIALS_JSON)
+                    if isinstance(raw_json, dict):
+                        cred_dict = raw_json
+                    else:
+                        clean_str = str(raw_json).strip().strip("'")
+                        try:
+                            cred_dict = json.loads(clean_str, strict=False)
+                        except Exception:
+                            clean_str_escaped = clean_str.replace("\r\n", "\\n").replace("\n", "\\n")
+                            cred_dict = json.loads(clean_str_escaped, strict=False)
+
                     cred = credentials.Certificate(cred_dict)
-                    logger.info("Initialized Firestore from FIREBASE_CREDENTIALS_JSON environment variable.")
+                    logger.info("Successfully initialized Firestore from FIREBASE_CREDENTIALS_JSON environment variable.")
                 except Exception as ex:
                     logger.error(f"Failed to parse FIREBASE_CREDENTIALS_JSON: {ex}")
 
-            # Option 2: Parse from Local File Path (credentials/firebase_service_account.json)
+            # Option 2: Search multiple potential credential file locations
             if not cred:
-                cred_path = settings.FIREBASE_CREDENTIALS_PATH
-                if os.path.exists(cred_path):
-                    cred = credentials.Certificate(cred_path)
-                    logger.info(f"Initialized Firestore with service account from {cred_path}")
+                candidate_paths = [
+                    settings.FIREBASE_CREDENTIALS_PATH,
+                    os.path.join(os.getcwd(), "credentials", "firebase_service_account.json"),
+                    os.path.join(os.path.dirname(__file__), "..", "..", "credentials", "firebase_service_account.json"),
+                    r"C:\Users\SAKTHIVEL\Documents\cred\firebase_service_account.json"
+                ]
+
+                for path in candidate_paths:
+                    if path and os.path.exists(path):
+                        try:
+                            cred = credentials.Certificate(path)
+                            logger.info(f"Successfully initialized Firestore with service account from: {path}")
+                            break
+                        except Exception as cerrex:
+                            logger.error(f"Error loading credentials from {path}: {cerrex}")
 
             if cred:
                 app = firebase_admin.initialize_app(cred, {
@@ -41,12 +62,12 @@ def init_firestore():
                 _db_client = firestore.client(app=app)
             else:
                 logger.warning(
-                    "Firestore credentials not found. "
+                    "Firestore credentials not found in any candidate path. "
                     "Operating in high-performance local fallback mode."
                 )
                 _db_client = None
     except Exception as e:
-        logger.warning(f"Firestore initialization bypassed: {e}")
+        logger.warning(f"Firestore initialization error: {e}")
         _db_client = None
 
     return _db_client
