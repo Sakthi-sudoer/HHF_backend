@@ -9,6 +9,12 @@ __pycache__/
 credentials/*.json
 !credentials/.gitkeep
 
+# Executables & Build Residue
+dist/
+build/
+*.exe
+*.spec
+
 # Testing & Coverage
 .pytest_cache/
 .coverage
