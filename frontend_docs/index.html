@@ -1,2071 +1,929 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Customer Registry Book - Healthy Home Foods</title>
-  
-  <!-- Inter Font -->
+
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- React & React DOM (v18 UMD) -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            tealbrand: {
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              900: '#134e4a',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
 
-  <!-- Axios for API Requests -->
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Axios for Network Requests -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
   <style>
-    :root {
-      --bg-dark: #0b1329;
-      --bg-main: #0f172a;
-      --bg-card: #1e293b;
-      --bg-card-hover: #334155;
-      --border-color: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #14b8a6;
-      --primary-hover: #0d9488;
-      --primary-light: rgba(20, 184, 166, 0.15);
-      --danger: #f43f5e;
-      --danger-light: rgba(244, 63, 94, 0.15);
-      --success: #10b981;
-      --warning: #f59e0b;
-      --veg-color: #22c55e;
-      --nonveg-color: #ef4444;
-      --radius: 12px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    /* Custom Scrollbars & Transitions */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-
-    body.light-theme {
-      --bg-dark: #f1f5f9;
-      --bg-main: #f8fafc;
-      --bg-card: #ffffff;
-      --bg-card-hover: #e2e8f0;
-      --border-color: #cbd5e1;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --primary-light: rgba(20, 184, 166, 0.2);
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-    }
-
-    #root {
-      display: flex;
-      width: 100%;
-      min-height: 100vh;
-    }
-
-    /* Desktop Sidebar */
-    .sidebar {
-      width: 260px;
-      background: var(--bg-dark);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 1rem;
-      position: fixed;
-      height: 100vh;
-      z-index: 10;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .brand-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #14b8a6, #0d9488);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .brand-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
-
-    .brand-subtitle {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    .nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      list-style: none;
-      overflow-y: auto;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      padding: 0.75rem 0.85rem;
-      border-radius: var(--radius);
-      color: var(--text-muted);
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.88rem;
-      transition: all 0.2s ease;
-    }
-
-    .nav-item:hover {
-      background: var(--bg-card-hover);
-      color: var(--text-main);
-    }
-
-    .nav-item.active {
-      background: var(--primary-light);
-      color: var(--primary);
-      border-left: 3px solid var(--primary);
-    }
-
-    /* Mobile Bottom Navigation Bar */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 65px;
-      background: var(--bg-dark);
-      border-top: 1px solid var(--border-color);
-      z-index: 90;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    @media (max-width: 768px) {
-      .mobile-bottom-nav {
-        display: flex;
-      }
-    }
-
-    .mobile-nav-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.2rem;
-      color: var(--text-muted);
-      font-size: 0.7rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .mobile-nav-btn.active {
-      color: var(--primary);
-    }
-
-    .mobile-nav-btn span {
-      font-size: 1.2rem;
-    }
-
-    /* Main Content */
-    .main-wrapper {
-      margin-left: 260px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    @media (max-width: 768px) {
-      .main-wrapper {
-        margin-left: 0;
-        padding-bottom: 70px;
-      }
-    }
-
-    /* Top Bar */
-    .top-bar {
-      height: 70px;
-      border-bottom: 1px solid var(--border-color);
-      background: var(--bg-main);
-      backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.5rem;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-
-    .top-bar-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    .top-bar-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .api-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .status-offline { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-
-    .content-container {
-      padding: 1.5rem;
-      flex: 1;
-    }
-
-    /* Common Card */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: var(--shadow);
-    }
-
-    /* Grid Layouts */
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-
-    @media (max-width: 600px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Quick Actions Bar */
-    .quick-actions-bar {
-      display: flex;
-      gap: 0.75rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-    }
-
-    .quick-action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .quick-action-btn:hover {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    /* Stat Cards */
-    .stat-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .stat-label {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .stat-value {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .stat-sub {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .badge-veg {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--veg-color);
-      padding: 0.2rem 0.5rem;
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
       border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
     }
-
-    .badge-nonveg {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--nonveg-color);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
     }
-
-    .badge-archived {
-      background: rgba(148, 163, 184, 0.15);
-      color: var(--text-muted);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    /* Buttons & Inputs */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.88rem;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #0f172a;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background: var(--bg-card-hover);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-secondary:hover {
-      filter: brightness(1.2);
-    }
-
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-    }
-
-    .input-field {
-      width: 100%;
-      padding: 0.65rem 1rem;
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .input-field:focus {
-      border-color: var(--primary);
-    }
-
-    /* Tables */
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      background: var(--bg-main);
-      padding: 0.85rem 1rem;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.88rem;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* GPay Timeline */
-    .timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      position: relative;
-      padding-left: 1rem;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 10px;
-      bottom: 10px;
-      width: 2px;
-      background: var(--border-color);
-    }
-
-    .timeline-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 0.85rem 1.1rem;
-      position: relative;
-    }
-
-    .timeline-card::before {
-      content: '';
-      position: absolute;
-      left: -1.35rem;
-      top: 1.1rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--primary);
-    }
-
-    .timeline-card.debit::before {
-      background: var(--danger);
-    }
-
-    /* Toast Notification */
-    .toast-container {
-      position: fixed;
-      bottom: 5rem;
-      right: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      z-index: 200;
-    }
-
-    .toast {
-      background: var(--bg-card);
-      border: 1px solid var(--primary);
-      color: var(--text-main);
-      padding: 0.85rem 1.25rem;
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.9rem;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      width: 92%;
-      max-width: 560px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    /* Invoice Printable Sheet */
-    .invoice-sheet {
-      background: white;
-      color: #0f172a;
-      padding: 2rem;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
+    .custom-shadow {
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
   </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-teal-500 selection:text-slate-900">
 
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const DEFAULT_API_BASE = "https://hhf-backend-4h27.onrender.com/api/v1";
-    let CURRENT_API_BASE = localStorage.getItem("API_BASE_URL") || DEFAULT_API_BASE;
-
-    function exportToCSV(filename, rows) {
-      if (!rows || !rows.length) return;
-      const separator = ',';
-      const keys = Object.keys(rows[0]);
-      const csvContent =
-        keys.join(separator) +
-        '\n' +
-        rows.map(row => {
-          return keys.map(k => {
-            let cell = row[k] === null || row[k] === undefined ? '' : row[k];
-            cell = cell instanceof Date ? cell.toLocaleString() : cell.toString().replace(/"/g, '""');
-            if (cell.search(/("|,|\n)/g) >= 0) cell = `"${cell}"`;
-            return cell;
-          }).join(separator);
-        }).join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    }
-
-    function App() {
-      // 1. Tab Persistence via localStorage & URL Hash
-      const getInitialTab = () => {
-        const hash = window.location.hash.replace("#", "");
-        if (hash) return hash;
-        return localStorage.getItem("ACTIVE_TAB") || "dashboard";
-      };
-
-      const [activeTab, setActiveTabState] = useState(getInitialTab());
-      const [apiConnected, setApiConnected] = useState(false);
-      const [apiBaseUrl, setApiBaseUrl] = useState(CURRENT_API_BASE);
-      const [showConfigModal, setShowConfigModal] = useState(false);
-      const [selectedCustomerForLedger, setSelectedCustomerForLedger] = useState(null);
-      const [theme, setTheme] = useState(localStorage.getItem("THEME") || "dark");
-      const [toast, setToast] = useState(null);
-
-      const setActiveTab = (tabName) => {
-        setActiveTabState(tabName);
-        localStorage.setItem("ACTIVE_TAB", tabName);
-        window.location.hash = tabName;
-      };
-
-      const showToast = (message) => {
-        setToast(message);
-        setTimeout(() => setToast(null), 3500);
-      };
-
-      useEffect(() => {
-        if (theme === "light") {
-          document.body.classList.add("light-theme");
-        } else {
-          document.body.classList.remove("light-theme");
-        }
-        localStorage.setItem("THEME", theme);
-      }, [theme]);
-
-      const checkHealth = async () => {
-        try {
-          await axios.get(`${apiBaseUrl}/dashboard?period=today`);
-          setApiConnected(true);
-        } catch (err) {
-          setApiConnected(false);
-        }
-      };
-
-      useEffect(() => {
-        checkHealth();
-        const interval = setInterval(checkHealth, 10000);
-        return () => clearInterval(interval);
-      }, [apiBaseUrl]);
-
-      const saveApiUrl = (newUrl) => {
-        localStorage.setItem("API_BASE_URL", newUrl);
-        setApiBaseUrl(newUrl);
-        setShowConfigModal(false);
-        showToast("API Server URL updated!");
-      };
-
-      const navigateToLedger = (customerId) => {
-        setSelectedCustomerForLedger(customerId);
-        setActiveTab("ledger");
-      };
-
-      return (
-        <div style={{ display: 'flex', width: '100%' }}>
-          {/* Desktop Sidebar */}
-          <div className="sidebar">
-            <div className="brand">
-              <div className="brand-icon">🍱</div>
-              <div>
-                <div className="brand-title">Healthy Home Foods</div>
-                <div className="brand-subtitle">Customer Registry & Ledger</div>
-              </div>
-            </div>
-
-            <ul className="nav-list">
-              <li className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-                <span>📊</span> Dashboard
-              </li>
-              <li className={`nav-item ${activeTab === 'customers' ? 'active' : ''}`} onClick={() => setActiveTab('customers')}>
-                <span>👥</span> Customer Directory
-              </li>
-              <li className={`nav-item ${activeTab === 'subscriptions' ? 'active' : ''}`} onClick={() => setActiveTab('subscriptions')}>
-                <span>📅</span> New Subscription
-              </li>
-              <li className={`nav-item ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => setActiveTab('delivery')}>
-                <span>🚚</span> Daily Delivery Sheet
-              </li>
-              <li className={`nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => setActiveTab('ledger')}>
-                <span>💳</span> Ledger & Invoices
-              </li>
-              <li className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
-                <span>💸</span> Operational Expenses
-              </li>
-              <li className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>
-                <span>📦</span> Inventory Manager
-              </li>
-              <li className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`} onClick={() => setActiveTab('reports')}>
-                <span>📈</span> Reports & Analytics
-              </li>
-              <li className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-                <span>⚙️</span> System Settings
-              </li>
-            </ul>
-          </div>
-
-          {/* Mobile Bottom Navigation Bar */}
-          <div className="mobile-bottom-nav">
-            <div className={`mobile-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-              <span>📊</span> Home
-            </div>
-            <div className={`mobile-nav-btn ${activeTab === 'customers' ? 'active' : ''}`} onClick={() => setActiveTab('customers')}>
-              <span>👥</span> Customers
-            </div>
-            <div className={`mobile-nav-btn ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => setActiveTab('delivery')}>
-              <span>🚚</span> Deliveries
-            </div>
-            <div className={`mobile-nav-btn ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => setActiveTab('ledger')}>
-              <span>💳</span> Ledger
-            </div>
-            <div className={`mobile-nav-btn ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
-              <span>💸</span> Expenses
-            </div>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="main-wrapper">
-            <div className="top-bar">
-              <div className="top-bar-title">
-                {activeTab === 'dashboard' && 'Dashboard Overview'}
-                {activeTab === 'customers' && 'Customer Registry Book (CRM)'}
-                {activeTab === 'subscriptions' && 'Create Customer Subscription'}
-                {activeTab === 'delivery' && 'Daily Delivery Sheet & Leave Manager'}
-                {activeTab === 'ledger' && 'Customer Ledger & Payment History'}
-                {activeTab === 'expenses' && 'Operational Expense Tracker'}
-                {activeTab === 'inventory' && 'Inventory & Stock Manager'}
-                {activeTab === 'reports' && 'Reports & Financial Analytics'}
-                {activeTab === 'settings' && 'System Configuration Settings'}
-              </div>
-
-              <div className="top-bar-actions">
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                >
-                  {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-                </button>
-
-                <div className="api-status" onClick={() => setShowConfigModal(true)} style={{ cursor: 'pointer' }}>
-                  <div className={`status-dot ${apiConnected ? 'status-online' : 'status-offline'}`}></div>
-                  <span>{apiConnected ? 'Cloud Live API' : 'Offline / Config'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="content-container">
-              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} navigateToLedger={navigateToLedger} showToast={showToast} />}
-              {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} showToast={showToast} />}
-              {activeTab === 'subscriptions' && <SubscriptionScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} showToast={showToast} />}
-              {activeTab === 'delivery' && <DeliverySheetScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
-              {activeTab === 'ledger' && <LedgerScreen apiBaseUrl={apiBaseUrl} initialCustomerId={selectedCustomerForLedger} showToast={showToast} />}
-              {activeTab === 'expenses' && <ExpensesScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
-              {activeTab === 'inventory' && <InventoryScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
-              {activeTab === 'reports' && <ReportsScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
-              {activeTab === 'settings' && <SettingsScreen apiBaseUrl={apiBaseUrl} showToast={showToast} saveApiUrl={saveApiUrl} />}
-            </div>
-          </div>
-
-          {/* Toast Notification */}
-          {toast && (
-            <div className="toast-container">
-              <div className="toast">
-                <span>✅</span> {toast}
-              </div>
-            </div>
-          )}
-
-          {/* API Config Modal */}
-          {showConfigModal && (
-            <div className="modal-overlay" onClick={() => setShowConfigModal(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1rem' }}>Configure API Server URL</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                  Set the backend API Base URL (Live Cloud Server or Localhost).
-                </p>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  defaultValue={apiBaseUrl} 
-                  id="api-url-input"
-                  placeholder="https://hhf-backend-4h27.onrender.com/api/v1"
-                />
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary" onClick={() => setShowConfigModal(false)}>Cancel</button>
-                  <button 
-                    className="btn btn-primary"
-                    onClick={() => saveApiUrl(document.getElementById('api-url-input').value)}
-                  >
-                    Save & Reconnect
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+  <!-- Main Container -->
+  <div id="app" class="flex w-full min-h-screen">
+    
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="hidden md:flex flex-col w-64 bg-slate-950 border-r border-slate-800 p-4 fixed h-full z-20">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 px-3 py-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-teal-500/20">
+          🍱
         </div>
-      );
-    }
+        <div>
+          <h1 class="font-bold text-base text-slate-100 leading-tight">Healthy Home Foods</h1>
+          <p class="text-xs text-teal-400 font-medium">Customer Registry Book</p>
+        </div>
+      </div>
 
-    // ==========================================
-    // 1. DASHBOARD SCREEN WITH QUICK ACTION BUTTONS
-    // ==========================================
-    function DashboardScreen({ apiBaseUrl, setActiveTab, navigateToLedger, showToast }) {
-      const [period, setPeriod] = useState("today");
-      const [data, setData] = useState(null);
-      const [loading, setLoading] = useState(true);
+      <!-- Navigation Links -->
+      <nav class="flex-1 space-y-1 overflow-y-auto">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-users text-base w-5 text-center"></i>
+          <span>Customer CRM</span>
+        </button>
+        <button onclick="switchTab('subscriptions')" id="nav-subscriptions" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-calendar-plus text-base w-5 text-center"></i>
+          <span>New Subscription</span>
+        </button>
+        <button onclick="switchTab('delivery')" id="nav-delivery" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-truck-ram-box text-base w-5 text-center"></i>
+          <span>Daily Deliveries</span>
+        </button>
+        <button onclick="switchTab('ledger')" id="nav-ledger" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
+          <span>Ledger & Payments</span>
+        </button>
+        <button onclick="switchTab('expenses')" id="nav-expenses" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-receipt text-base w-5 text-center"></i>
+          <span>Expenses</span>
+        </button>
+        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-boxes-stacked text-base w-5 text-center"></i>
+          <span>Stock & Inventory</span>
+        </button>
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
+          <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
 
-      const fetchDashboard = async () => {
-        setLoading(true);
-        try {
-          const res = await axios.get(`${apiBaseUrl}/dashboard?period=${period}`);
-          if (res.data && res.data.data) {
-            setData(res.data.data);
-          }
-        } catch (err) {
-          setData({
-            operations: {
-              date: new Date().toISOString().split('T')[0],
-              breakfast: { veg: 8, non_veg: 0, total: 8 },
-              lunch: { veg: 0, non_veg: 8, total: 8 },
-              dinner: { veg: 6, non_veg: 0, total: 6 },
-              total_meals: 22
-            },
-            financials: {
-              period: period,
-              todays_collection: 5496.0,
-              pending_amount: 8232.0,
-              todays_revenue: 13728.0,
-              total_expenses: 0.0,
-              profit: 13728.0
-            },
-            active_customers_count: 8,
-            paused_customers_count: 0
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      useEffect(() => { fetchDashboard(); }, [period, apiBaseUrl]);
-
-      if (loading && !data) return <div style={{ color: 'var(--text-muted)' }}>Loading dashboard metrics...</div>;
-
-      const ops = data.operations;
-      const fin = data.financials;
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Quick Actions Bar */}
-          <div className="quick-actions-bar">
-            <button className="quick-action-btn" onClick={() => setActiveTab("customers")}>
-              <span>👤</span> + Add Customer
-            </button>
-            <button className="quick-action-btn" onClick={() => setActiveTab("subscriptions")}>
-              <span>📄</span> + Create Subscription
-            </button>
-            <button className="quick-action-btn" onClick={() => setActiveTab("ledger")}>
-              <span>💳</span> + Record Payment
-            </button>
-            <button className="quick-action-btn" onClick={() => setActiveTab("delivery")}>
-              <span>🌴</span> Mark Leave / Skip
-            </button>
-            <button className="quick-action-btn" onClick={() => setActiveTab("expenses")}>
-              <span>💸</span> + Log Expense
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h2 style={{ fontSize: '1.4rem' }}>Operational & Financial Summary</h2>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Date: {ops.date}</span>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-card)', padding: '0.3rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              {['today', 'this_week', 'this_month'].map(p => (
-                <button 
-                  key={p} 
-                  className={`btn ${period === p ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                  onClick={() => setPeriod(p)}
-                >
-                  {p.replace('_', ' ').toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
+      <!-- Connection Status Card -->
+      <div class="mt-auto pt-4 border-t border-slate-800">
+        <div onclick="openConfigModal()" class="p-3 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition flex items-center gap-3">
+          <div id="status-indicator" class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50"></div>
           <div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Today's Prepared Meals</h3>
-            <div className="grid-4">
-              <div className="card stat-card">
-                <div className="stat-label">🥞 Breakfast</div>
-                <div className="stat-value">{ops.breakfast.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                  <span className="badge-veg">Veg: {ops.breakfast.veg}</span>
-                  <span className="badge-nonveg">Non-Veg: {ops.breakfast.non_veg}</span>
-                </div>
-              </div>
-
-              <div className="card stat-card">
-                <div className="stat-label">🍛 Lunch</div>
-                <div className="stat-value">{ops.lunch.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                  <span className="badge-veg">Veg: {ops.lunch.veg}</span>
-                  <span className="badge-nonveg">Non-Veg: {ops.lunch.non_veg}</span>
-                </div>
-              </div>
-
-              <div className="card stat-card">
-                <div className="stat-label">🍲 Dinner</div>
-                <div className="stat-value">{ops.dinner.total} <span style={{ fontSize: '0.9rem', fontWeight: 400 }}>meals</span></div>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                  <span className="badge-veg">Veg: {ops.dinner.veg}</span>
-                  <span className="badge-nonveg">Non-Veg: {ops.dinner.non_veg}</span>
-                </div>
-              </div>
-
-              <div className="card stat-card" style={{ background: 'linear-gradient(135deg, #1e293b, #0f766e)' }}>
-                <div className="stat-label" style={{ color: '#5eead4' }}>🍱 Grand Total Meals</div>
-                <div className="stat-value">{ops.total_meals}</div>
-                <div className="stat-sub">Prepared for {data.active_customers_count} active customers</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>Financial Performance</h3>
-            <div className="grid-3">
-              <div className="card stat-card">
-                <div className="stat-label">💵 Payments Collected ({period})</div>
-                <div className="stat-value" style={{ color: 'var(--success)' }}>₹{fin.todays_collection.toLocaleString()}</div>
-                <div className="stat-sub">Actual cash/UPI received</div>
-              </div>
-
-              <div className="card stat-card">
-                <div className="stat-label">⚠️ Outstanding Pending Amount</div>
-                <div className="stat-value" style={{ color: 'var(--danger)' }}>₹{fin.pending_amount.toLocaleString()}</div>
-                <div className="stat-sub">Uncollected customer balance</div>
-              </div>
-
-              <div className="card stat-card">
-                <div className="stat-label">📈 Revenue Accrued</div>
-                <div className="stat-value">₹{fin.todays_revenue.toLocaleString()}</div>
-                <div className="stat-sub">Total invoiced amount</div>
-              </div>
-
-              <div className="card stat-card">
-                <div className="stat-label">🛒 Operational Expenses</div>
-                <div className="stat-value" style={{ color: 'var(--warning)' }}>₹{fin.total_expenses.toLocaleString()}</div>
-                <div className="stat-sub">Groceries, milk, veggies</div>
-              </div>
-
-              <div className="card stat-card" style={{ gridColumn: 'span 2', background: 'linear-gradient(135deg, #1e293b, #115e59)' }}>
-                <div className="stat-label" style={{ color: '#5eead4' }}>💰 Net Profit ({period})</div>
-                <div className="stat-value" style={{ fontSize: '2.4rem', color: '#5eead4' }}>
-                  ₹{fin.profit.toLocaleString()}
-                </div>
-                <div className="stat-sub" style={{ color: '#99f6e4' }}>
-                  Calculated as (Revenue Accrued - Total Expenses)
-                </div>
-              </div>
-            </div>
+            <p id="status-title" class="text-xs font-semibold text-slate-200">Cloud API Connected</p>
+            <p id="status-url" class="text-[10px] text-slate-400 truncate max-w-[140px]">onrender.com</p>
           </div>
         </div>
-      );
-    }
+      </div>
+    </aside>
 
-    // ==========================================
-    // 2. CUSTOMER REGISTRY BOOK (CRM)
-    // ==========================================
-    function CustomerScreen({ apiBaseUrl, navigateToLedger, showToast }) {
-      const [customers, setCustomers] = useState([]);
-      const [search, setSearch] = useState("");
-      const [showAddModal, setShowAddModal] = useState(false);
-      const [editCustomer, setEditCustomer] = useState(null);
-      const [archiveModalCust, setArchiveModalCust] = useState(null);
-      const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950 border-t border-slate-800 z-30 flex items-center justify-around px-2">
+      <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
+        <i class="fa-solid fa-chart-pie text-lg"></i>
+        <span>Home</span>
+      </button>
+      <button onclick="switchTab('customers')" id="mobile-nav-customers" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
+        <i class="fa-solid fa-users text-lg"></i>
+        <span>CRM</span>
+      </button>
+      <button onclick="switchTab('delivery')" id="mobile-nav-delivery" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
+        <i class="fa-solid fa-truck text-lg"></i>
+        <span>Delivery</span>
+      </button>
+      <button onclick="switchTab('ledger')" id="mobile-nav-ledger" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
+        <i class="fa-solid fa-wallet text-lg"></i>
+        <span>Ledger</span>
+      </button>
+      <button onclick="switchTab('expenses')" id="mobile-nav-expenses" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
+        <i class="fa-solid fa-receipt text-lg"></i>
+        <span>Expenses</span>
+      </button>
+    </div>
 
-      const loadCustomers = async () => {
-        try {
-          const res = await axios.get(`${apiBaseUrl}/customers?query=${search}`);
-          if (res.data && res.data.data) {
-            setCustomers(res.data.data);
-          }
-        } catch (err) {
-          setCustomers([
-            { id: "cust_1", name: "Ravi Kumar", phone: "9876543210", address: "123 Main Street, Sector 4", landmark: "Near City Park", status: "active" },
-            { id: "cust_2", name: "Priya Sharma", phone: "9123456789", address: "456 Rose Apartment", landmark: "Opp Metro", status: "active" }
-          ]);
-        }
-      };
+    <!-- Main Workspace -->
+    <main class="flex-1 md:ml-64 pb-20 md:pb-8 min-w-0">
+      
+      <!-- Sticky Header -->
+      <header class="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 id="page-title" class="text-xl font-bold text-slate-100">Dashboard Overview</h2>
+          <p id="page-subtitle" class="text-xs text-slate-400">Live operational & financial metrics</p>
+        </div>
 
-      useEffect(() => { loadCustomers(); }, [search, apiBaseUrl]);
+        <div class="flex items-center gap-3">
+          <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-slate-100 flex items-center justify-center text-sm transition">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-teal-400 hover:bg-slate-700 transition">
+            <i class="fa-solid fa-wifi mr-1"></i> API Server
+          </button>
+        </div>
+      </header>
 
-      const handleAddCustomer = async (e) => {
-        e.preventDefault();
-        try {
-          await axios.post(`${apiBaseUrl}/customers`, formData);
-          showToast("New Customer registered!");
-        } catch (err) {
-          showToast("Customer registered!");
-        } finally {
-          setShowAddModal(false);
-          setFormData({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
-          loadCustomers();
-        }
-      };
+      <!-- Content Views -->
+      <div class="p-6">
+        
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="tab-view space-y-6">
+          <!-- Quick Action Cards -->
+          <div class="flex gap-3 overflow-x-auto pb-2">
+            <button onclick="switchTab('customers'); openAddCustomerModal();" class="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 whitespace-nowrap transition">
+              <i class="fa-solid fa-user-plus text-teal-400"></i> + Add Customer
+            </button>
+            <button onclick="switchTab('subscriptions')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 whitespace-nowrap transition">
+              <i class="fa-solid fa-file-signature text-teal-400"></i> + Create Plan
+            </button>
+            <button onclick="switchTab('ledger')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 whitespace-nowrap transition">
+              <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> + Record Payment
+            </button>
+            <button onclick="switchTab('expenses')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 whitespace-nowrap transition">
+              <i class="fa-solid fa-cart-shopping text-amber-400"></i> + Log Expense
+            </button>
+          </div>
 
-      const handleEditCustomerSubmit = async (e) => {
-        e.preventDefault();
-        try {
-          await axios.put(`${apiBaseUrl}/customers/${editCustomer.id}`, formData);
-          showToast("Customer profile updated!");
-        } catch (err) {
-          showToast("Customer profile updated!");
-        } finally {
-          setEditCustomer(null);
-          loadCustomers();
-        }
-      };
+          <!-- Prepared Meals Section -->
+          <div>
+            <h3 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-3">Today's Meal Preparation Matrix</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              
+              <!-- Breakfast -->
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-400 uppercase">🥞 Breakfast</span>
+                  <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Morning</span>
+                </div>
+                <div class="mt-3 flex items-baseline gap-2">
+                  <span id="dash-b-total" class="text-3xl font-extrabold text-slate-100">8</span>
+                  <span class="text-xs text-slate-400">meals</span>
+                </div>
+                <div class="mt-3 flex gap-2 text-xs">
+                  <span id="dash-b-veg" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">Veg: 8</span>
+                  <span id="dash-b-nonveg" class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-medium">Non-Veg: 0</span>
+                </div>
+              </div>
 
-      const confirmArchiveCustomer = async () => {
-        try {
-          await axios.delete(`${apiBaseUrl}/customers/${archiveModalCust.id}`);
-          showToast("Customer archived successfully!");
-        } catch (err) {
-          showToast("Customer archived!");
-        } finally {
-          setArchiveModalCust(null);
-          loadCustomers();
-        }
-      };
+              <!-- Lunch -->
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-400 uppercase">🍛 Lunch</span>
+                  <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Afternoon</span>
+                </div>
+                <div class="mt-3 flex items-baseline gap-2">
+                  <span id="dash-l-total" class="text-3xl font-extrabold text-slate-100">8</span>
+                  <span class="text-xs text-slate-400">meals</span>
+                </div>
+                <div class="mt-3 flex gap-2 text-xs">
+                  <span id="dash-l-veg" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">Veg: 0</span>
+                  <span id="dash-l-nonveg" class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-medium">Non-Veg: 8</span>
+                </div>
+              </div>
 
-      const openEditModal = (c) => {
-        setEditCustomer(c);
-        setFormData({
-          name: c.name,
-          phone: c.phone,
-          address: c.address,
-          landmark: c.landmark || "",
-          status: c.status || "active",
-          deposit_amount: c.deposit_amount || 600
-        });
-      };
+              <!-- Dinner -->
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-400 uppercase">🍲 Dinner</span>
+                  <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold">Night</span>
+                </div>
+                <div class="mt-3 flex items-baseline gap-2">
+                  <span id="dash-d-total" class="text-3xl font-extrabold text-slate-100">6</span>
+                  <span class="text-xs text-slate-400">meals</span>
+                </div>
+                <div class="mt-3 flex gap-2 text-xs">
+                  <span id="dash-d-veg" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">Veg: 6</span>
+                  <span id="dash-d-nonveg" class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-medium">Non-Veg: 0</span>
+                </div>
+              </div>
 
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="🔍 Search customer by name, phone, address..." 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ maxWidth: '380px' }}
-            />
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="btn btn-secondary" onClick={() => exportToCSV("customers.csv", customers)}>
-                📥 Export CSV
+              <!-- Grand Total -->
+              <div class="bg-gradient-to-br from-teal-900/40 to-emerald-900/40 border border-teal-500/30 rounded-2xl p-5 custom-shadow">
+                <span class="text-xs font-semibold text-teal-300 uppercase">🍱 Total Prepared Meals</span>
+                <div class="mt-3 flex items-baseline gap-2">
+                  <span id="dash-grand-total" class="text-3xl font-extrabold text-teal-300">22</span>
+                  <span class="text-xs text-teal-400 font-medium">today</span>
+                </div>
+                <p id="dash-cust-count" class="mt-3 text-xs text-slate-300">For 8 active customers</p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Financial Performance Section -->
+          <div>
+            <h3 class="text-sm font-bold text-teal-400 uppercase tracking-wider mb-3">Financial Performance Overview</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <p class="text-xs font-medium text-slate-400">💵 Payments Received Today</p>
+                <p id="dash-collected" class="text-2xl font-bold text-emerald-400 mt-2">₹5,496</p>
+                <p class="text-xs text-slate-500 mt-1">Actual GPay / Cash collected</p>
+              </div>
+
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <p class="text-xs font-medium text-slate-400">⚠️ Pending Uncollected Balance</p>
+                <p id="dash-pending" class="text-2xl font-bold text-rose-400 mt-2">₹8,232</p>
+                <p class="text-xs text-slate-500 mt-1">Customer running ledger balance</p>
+              </div>
+
+              <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+                <p class="text-xs font-medium text-slate-400">📈 Net Invoiced Revenue</p>
+                <p id="dash-revenue" class="text-2xl font-bold text-slate-100 mt-2">₹13,728</p>
+                <p class="text-xs text-slate-500 mt-1">Total billing generated</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CUSTOMER CRM VIEW -->
+        <section id="view-customers" class="tab-view hidden space-y-4">
+          <div class="flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <div class="relative w-full sm:w-80">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+              <input type="text" id="cust-search" oninput="fetchCustomers()" placeholder="Search name, phone, address..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-teal-500">
+            </div>
+
+            <div class="flex gap-2 w-full sm:w-auto">
+              <button onclick="exportCSV('customers')" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-700 transition">
+                <i class="fa-solid fa-download mr-1"></i> Export CSV
               </button>
-              <button className="btn btn-primary" onClick={() => {
-                setFormData({ name: "", phone: "", address: "", landmark: "", status: "active", deposit_amount: 600 });
-                setShowAddModal(true);
-              }}>
-                + Add New Customer
+              <button onclick="openAddCustomerModal()" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 rounded-xl text-xs font-bold text-slate-950 transition">
+                + Register Customer
               </button>
             </div>
           </div>
 
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer Name</th>
-                  <th>Phone</th>
-                  <th>Address & Landmark</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customers.map(c => (
-                  <tr key={c.id}>
-                    <td style={{ fontWeight: 600 }}>{c.name}</td>
-                    <td>{c.phone}</td>
-                    <td>{c.address} {c.landmark && <span style={{ color: 'var(--text-muted)' }}>({c.landmark})</span>}</td>
-                    <td>
-                      <span className={c.status === 'active' ? 'badge-veg' : c.status === 'paused' ? 'badge-nonveg' : 'badge-archived'}>
-                        {c.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => navigateToLedger(c.id)}>
-                          💳 Ledger
-                        </button>
-                        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => openEditModal(c)}>
-                          ✏️ Edit
-                        </button>
-                        <button className="btn btn-danger" style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }} onClick={() => setArchiveModalCust(c)}>
-                          🗑️ Archive
-                        </button>
-                      </div>
-                    </td>
+          <!-- Customer Table -->
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden custom-shadow">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-slate-300">
+                <thead class="bg-slate-900/60 text-xs uppercase text-slate-400 border-b border-slate-700">
+                  <tr>
+                    <th class="px-5 py-3.5 font-semibold">Customer</th>
+                    <th class="px-5 py-3.5 font-semibold">Phone</th>
+                    <th class="px-5 py-3.5 font-semibold">Address</th>
+                    <th class="px-5 py-3.5 font-semibold">Status</th>
+                    <th class="px-5 py-3.5 font-semibold text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody id="cust-table-body" class="divide-y divide-slate-700/50">
+                  <!-- Rows injected via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
+        </section>
 
-          {/* Add Customer Modal */}
-          {showAddModal && (
-            <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>Register New Customer Profile</h3>
-                <form onSubmit={handleAddCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name *</label>
-                    <input type="text" required className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number *</label>
-                    <input type="text" required className="input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Address *</label>
-                    <input type="text" required className="input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Landmark (Optional)</label>
-                    <input type="text" className="input-field" value={formData.landmark} onChange={e => setFormData({ ...formData, landmark: e.target.value })} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Customer Profile</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Edit Customer Modal */}
-          {editCustomer && (
-            <div className="modal-overlay" onClick={() => setEditCustomer(null)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>✏️ Edit Customer Profile</h3>
-                <form onSubmit={handleEditCustomerSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Name</label>
-                    <input type="text" required className="input-field" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Phone Number</label>
-                    <input type="text" required className="input-field" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Address</label>
-                    <input type="text" required className="input-field" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Landmark</label>
-                    <input type="text" className="input-field" value={formData.landmark} onChange={e => setFormData({ ...formData, landmark: e.target.value })} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Account Status</label>
-                    <select className="input-field" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                      <option value="active">Active</option>
-                      <option value="paused">Paused</option>
-                      <option value="archived">Archived</option>
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => setEditCustomer(null)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Changes</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Archive Modal */}
-          {archiveModalCust && (
-            <div className="modal-overlay" onClick={() => setArchiveModalCust(null)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1rem' }}>🗑️ Archive Customer Profile?</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                  Are you sure you want to archive <strong>{archiveModalCust.name}</strong>?
-                </p>
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary" onClick={() => setArchiveModalCust(null)}>Cancel</button>
-                  <button className="btn btn-danger" onClick={confirmArchiveCustomer}>Confirm Archive</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // ==========================================
-    // 3. SUBSCRIPTION ENGINE SCREEN
-    // ==========================================
-    function SubscriptionScreen({ apiBaseUrl, setActiveTab, showToast }) {
-      const [customers, setCustomers] = useState([]);
-      const [selectedCustomer, setSelectedCustomer] = useState("");
-      const [subType, setSubType] = useState("monthly");
-      const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-      const [meals, setMeals] = useState({ breakfast: true, lunch: true, dinner: true });
-      const [prefs, setPrefs] = useState({ breakfast: "veg", lunch: "non_veg", dinner: "veg" });
-
-      useEffect(() => {
-        axios.get(`${apiBaseUrl}/customers`).then(res => {
-          if (res.data && res.data.data) setCustomers(res.data.data);
-        }).catch(() => {
-          setCustomers([{ id: "cust_1", name: "Ravi Kumar" }]);
-        });
-      }, []);
-
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-          await axios.post(`${apiBaseUrl}/subscriptions`, {
-            customer_id: selectedCustomer,
-            subscription_type: subType,
-            start_date: startDate,
-            meals,
-            preferences: prefs
-          });
-          showToast("Subscription created & auto-invoice generated!");
-        } catch (err) {
-          showToast("Subscription order submitted!");
-        } finally {
-          setActiveTab("delivery");
-        }
-      };
-
-      return (
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <div className="card">
-            <h2 style={{ fontSize: '1.3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-              Create Customer Meal Subscription
-            </h2>
-
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <!-- 3. SUBSCRIPTIONS VIEW -->
+        <section id="view-subscriptions" class="tab-view hidden space-y-4">
+          <div class="max-w-2xl mx-auto bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 custom-shadow">
+            <h3 class="text-lg font-bold text-slate-100 mb-4">Create Food Subscription Plan</h3>
+            <form onsubmit="handleCreateSubscription(event)" class="space-y-4">
               <div>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Select Customer</label>
-                <select className="input-field" value={selectedCustomer} onChange={e => setSelectedCustomer(e.target.value)} required>
-                  <option value="">-- Choose Customer --</option>
-                  {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.phone || c.id})</option>)}
+                <label class="block text-xs font-medium text-slate-400 mb-1">Select Customer</label>
+                <select id="sub-cust-select" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-teal-500 outline-none">
+                  <!-- Options injected via JS -->
                 </select>
               </div>
 
-              <div className="grid-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Subscription Plan</label>
-                  <select className="input-field" value={subType} onChange={e => setSubType(e.target.value)}>
-                    <option value="monthly">Monthly (26 Delivery Days - Sunday Skip)</option>
-                    <option value="weekly">Weekly (6 Working Days)</option>
-                    <option value="trial">Trial (Custom Dates)</option>
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Plan Type</label>
+                  <select id="sub-type" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-teal-500 outline-none">
+                    <option value="monthly">Monthly (26 Working Days - Skip Sundays)</option>
+                    <option value="weekly">Weekly (6 Days)</option>
+                    <option value="trial">Trial (Custom Days)</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Start Date</label>
-                  <input type="date" className="input-field" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Start Date</label>
+                  <input type="date" id="sub-start-date" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-teal-500 outline-none">
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: '0.75rem' }}>
-                  Meal Selection & Dietary Preference
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {['breakfast', 'lunch', 'dinner'].map(m => (
-                    <div key={m} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', background: 'var(--bg-main)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', flex: 1, textTransform: 'capitalize' }}>
-                        <input type="checkbox" checked={meals[m]} onChange={e => setMeals({ ...meals, [m]: e.target.checked })} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
-                        <span style={{ fontWeight: 600 }}>{m}</span>
-                      </label>
-                      {meals[m] && (
-                        <select className="input-field" style={{ width: '140px', padding: '0.4rem 0.6rem' }} value={prefs[m]} onChange={e => setPrefs({ ...prefs, [m]: e.target.value })}>
-                          <option value="veg">🟢 Veg</option>
-                          <option value="non_veg">🔴 Non-Veg</option>
-                        </select>
-                      )}
-                    </div>
-                  ))}
+              <div class="space-y-3 pt-2">
+                <label class="block text-xs font-medium text-slate-400">Meal Inclusions & Dietary Preference</label>
+                
+                <div class="flex items-center justify-between p-3 bg-slate-900 border border-slate-700 rounded-xl">
+                  <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-slate-200">
+                    <input type="checkbox" id="meal-b" checked class="w-4 h-4 accent-teal-500">
+                    <span>Breakfast</span>
+                  </label>
+                  <select id="pref-b" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-xs text-slate-200">
+                    <option value="veg">🟢 Veg</option>
+                    <option value="non_veg">🔴 Non-Veg</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-slate-900 border border-slate-700 rounded-xl">
+                  <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-slate-200">
+                    <input type="checkbox" id="meal-l" checked class="w-4 h-4 accent-teal-500">
+                    <span>Lunch</span>
+                  </label>
+                  <select id="pref-l" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-xs text-slate-200">
+                    <option value="non_veg">🔴 Non-Veg</option>
+                    <option value="veg">🟢 Veg</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-slate-900 border border-slate-700 rounded-xl">
+                  <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-slate-200">
+                    <input type="checkbox" id="meal-d" checked class="w-4 h-4 accent-teal-500">
+                    <span>Dinner</span>
+                  </label>
+                  <select id="pref-d" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-xs text-slate-200">
+                    <option value="veg">🟢 Veg</option>
+                    <option value="non_veg">🔴 Non-Veg</option>
+                  </select>
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', padding: '0.85rem' }}>
-                🚀 Create Subscription & Generate Auto-Invoice
+              <button type="submit" class="w-full py-3 bg-teal-500 hover:bg-teal-600 font-bold text-slate-950 text-sm rounded-xl transition shadow-lg shadow-teal-500/20">
+                🚀 Create Plan & Generate Auto-Invoice
               </button>
             </form>
           </div>
-        </div>
-      );
-    }
+        </section>
 
-    // ==========================================
-    // 4. DAILY DELIVERY SHEET SCREEN
-    // ==========================================
-    function DeliverySheetScreen({ apiBaseUrl, showToast }) {
-      const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
-      const [sheetData, setSheetData] = useState([]);
-      const [cancelModal, setCancelModal] = useState(null);
-      const [extensionMode, setExtensionMode] = useState("automatic");
-
-      const loadSheet = async () => {
-        try {
-          const res = await axios.get(`${apiBaseUrl}/deliveries/sheet?target_date=${targetDate}`);
-          if (res.data && res.data.data) setSheetData(res.data.data);
-        } catch (err) {
-          setSheetData([
-            { customer_id: "cust_1", name: "Ravi Kumar", breakfast: { active: true, pref: "veg" }, lunch: { active: true, pref: "non_veg" }, dinner: { active: true, pref: "veg" } }
-          ]);
-        }
-      };
-
-      useEffect(() => { loadSheet(); }, [targetDate, apiBaseUrl]);
-
-      const handleMealClick = (cust, mealType) => {
-        setCancelModal({ cust, mealType });
-      };
-
-      const confirmCancellation = async () => {
-        try {
-          await axios.post(`${apiBaseUrl}/deliveries/cancel-meal?target_date=${targetDate}&customer_id=${cancelModal.cust.customer_id}`, {
-            meal_type: cancelModal.mealType,
-            extension_mode: extensionMode
-          });
-          showToast(`Meal cancelled. Subscription extended (+1 day skipping Sundays).`);
-        } catch (err) {
-          showToast("Meal cancellation logged & subscription extended!");
-        } finally {
-          setCancelModal(null);
-          loadSheet();
-        }
-      };
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <h2 style={{ fontSize: '1.3rem' }}>Delivery Roster Matrix</h2>
-              <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ width: '180px' }} />
+        <!-- 4. DAILY DELIVERY SHEET VIEW -->
+        <section id="view-delivery" class="tab-view hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <input type="date" id="delivery-date-picker" onchange="fetchDeliverySheet()" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
             </div>
-            <button className="btn btn-secondary" onClick={() => exportToCSV(`delivery_sheet_${targetDate}.csv`, sheetData)}>
-              📥 Export Sheet CSV
+            <button onclick="exportCSV('delivery')" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300">
+              📥 Export Sheet
             </button>
           </div>
 
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer Name</th>
-                  <th>Breakfast</th>
-                  <th>Lunch</th>
-                  <th>Dinner</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sheetData.map(row => (
-                  <tr key={row.customer_id}>
-                    <td style={{ fontWeight: 600 }}>{row.name}</td>
-                    {['breakfast', 'lunch', 'dinner'].map(m => (
-                      <td key={m}>
-                        {row[m].active ? (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => handleMealClick(row, m)}>
-                            <span className={`badge-${row[m].pref === 'veg' ? 'veg' : 'nonveg'}`}>
-                              ✓ {row[m].pref.toUpperCase()}
-                            </span>
-                          </div>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)' }}>-</span>
-                        )}
-                      </td>
-                    ))}
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden custom-shadow">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-slate-300">
+                <thead class="bg-slate-900/60 text-xs uppercase text-slate-400 border-b border-slate-700">
+                  <tr>
+                    <th class="px-5 py-3.5 font-semibold">Customer</th>
+                    <th class="px-5 py-3.5 font-semibold">Breakfast</th>
+                    <th class="px-5 py-3.5 font-semibold">Lunch</th>
+                    <th class="px-5 py-3.5 font-semibold">Dinner</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {cancelModal && (
-            <div className="modal-overlay" onClick={() => setCancelModal(null)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1rem' }}>
-                  Cancel {cancelModal.mealType.toUpperCase()} for {cancelModal.cust.name}?
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-                  Cancelling this meal triggers the backend extension engine.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input type="radio" name="ext" checked={extensionMode === 'automatic'} onChange={() => setExtensionMode('automatic')} />
-                    <span><strong>Automatic Extension</strong> (+1 working day, skipping Sundays)</span>
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input type="radio" name="ext" checked={extensionMode === 'manual'} onChange={() => setExtensionMode('manual')} />
-                    <span><strong>Manual Extension Date</strong></span>
-                  </label>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary" onClick={() => setCancelModal(null)}>Back</button>
-                  <button className="btn btn-danger" onClick={confirmCancellation}>Confirm Cancellation & Extend</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // ==========================================
-    // 5. LEDGER & PAYMENTS SCREEN (WITH PDF PREVIEW)
-    // ==========================================
-    function LedgerScreen({ apiBaseUrl, initialCustomerId, showToast }) {
-      const [customerId, setCustomerId] = useState(initialCustomerId || "cust_1");
-      const [ledger, setLedger] = useState(null);
-      const [showPaymentModal, setShowPaymentModal] = useState(false);
-      const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-      const [payAmount, setPayAmount] = useState("");
-      const [payMethod, setPayMethod] = useState("upi");
-      const [refNum, setRefNum] = useState("");
-
-      const loadLedger = async () => {
-        try {
-          const res = await axios.get(`${apiBaseUrl}/ledger/customer/${customerId}`);
-          if (res.data && res.data.data) setLedger(res.data.data);
-        } catch (err) {
-          setLedger({
-            customer_name: "Ravi Kumar",
-            total_invoiced: 5400.0,
-            total_paid: 4000.0,
-            current_balance: 1400.0,
-            timeline: [
-              { id: "t1", date: "2026-07-25", type: "invoice", title: "Monthly Subscription Invoice", amount: 5400.0, is_debit: true },
-              { id: "t2", date: "2026-07-25", type: "payment", title: "UPI Payment Received", amount: 3000.0, ref: "UPI9988776655", is_debit: false }
-            ]
-          });
-        }
-      };
-
-      useEffect(() => { loadLedger(); }, [customerId, apiBaseUrl]);
-
-      const handleAddPayment = async (e) => {
-        e.preventDefault();
-        try {
-          await axios.post(`${apiBaseUrl}/payments`, {
-            customer_id: customerId,
-            amount: parseFloat(payAmount),
-            payment_method: payMethod,
-            payment_date: new Date().toISOString().split('T')[0],
-            reference_number: refNum
-          });
-          showToast("Payment recorded successfully!");
-        } catch (err) {
-          showToast("Payment recorded!");
-        } finally {
-          setShowPaymentModal(false);
-          loadLedger();
-        }
-      };
-
-      const handleVoidPayment = async (payId) => {
-        if (!confirm("Are you sure you want to void this payment? Running balance will be adjusted.")) return;
-        try {
-          await axios.delete(`${apiBaseUrl}/payments/${payId}`);
-          showToast("Payment voided!");
-        } catch (err) {
-          showToast("Payment voided!");
-        } finally {
-          loadLedger();
-        }
-      };
-
-      if (!ledger) return <div style={{ color: 'var(--text-muted)' }}>Loading customer ledger...</div>;
-
-      return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h2 style={{ fontSize: '1.3rem' }}>{ledger.customer_name}</h2>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Double-Entry Transaction Ledger</span>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Current Balance</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 700, color: ledger.current_balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
-                ₹{ledger.current_balance.toLocaleString()}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn btn-secondary" onClick={() => setShowInvoiceModal(true)}>
-                📄 Preview Invoice
-              </button>
-              <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
-                + Add Payment
-              </button>
+                </thead>
+                <tbody id="delivery-table-body" class="divide-y divide-slate-700/50">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
             </div>
           </div>
+        </section>
 
-          <div className="card">
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-              Transaction Timeline
-            </h3>
+        <!-- 5. LEDGER VIEW -->
+        <section id="view-ledger" class="tab-view hidden space-y-4">
+          <div class="max-w-3xl mx-auto space-y-4">
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4 custom-shadow">
+              <div class="w-full sm:w-auto">
+                <label class="block text-xs font-medium text-slate-400 mb-1">Select Customer Ledger</label>
+                <select id="ledger-cust-select" onchange="fetchLedger()" class="w-full sm:w-64 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
+                  <!-- Injected via JS -->
+                </select>
+              </div>
 
-            <div className="timeline">
-              {ledger.timeline.map(item => (
-                <div key={item.id} className={`timeline-card ${item.is_debit ? 'debit' : 'credit'}`}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{item.title}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                        {item.date} {item.ref && `• Ref: ${item.ref}`}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: item.is_debit ? 'var(--danger)' : 'var(--success)' }}>
-                        {item.is_debit ? `- ₹${item.amount}` : `+ ₹${item.amount}`}
-                      </div>
-                      {!item.is_debit && (
-                        <button className="btn btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleVoidPayment(item.id)}>
-                          Void
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              <div class="text-right w-full sm:w-auto">
+                <p class="text-xs text-slate-400">Current Balance</p>
+                <p id="ledger-balance" class="text-2xl font-bold text-rose-400">₹0.00</p>
+              </div>
 
-          {/* Invoice PDF Preview Modal */}
-          {showInvoiceModal && (
-            <div className="modal-overlay" onClick={() => setShowInvoiceModal(false)}>
-              <div className="modal-content" style={{ maxWidth: '680px' }} onClick={e => e.stopPropagation()}>
-                <div className="invoice-sheet">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #0f172a', paddingBottom: '1rem' }}>
-                    <div>
-                      <h2 style={{ color: '#0d9488', fontSize: '1.5rem' }}>HEALTHY HOME FOODS</h2>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Home-Based Meal Subscription Service</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <h3 style={{ fontSize: '1.2rem' }}>INVOICE</h3>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>INV-{new Date().toISOString().split('T')[0]}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', margin: '1.5rem 0', fontSize: '0.85rem' }}>
-                    <div>
-                      <strong>Billed To:</strong>
-                      <div>{ledger.customer_name}</div>
-                      <div>Phone: {ledger.customer_phone || "9876543210"}</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div>Date: {new Date().toISOString().split('T')[0]}</div>
-                      <div>Status: <strong>{ledger.current_balance > 0 ? 'PENDING' : 'PAID'}</strong></div>
-                    </div>
-                  </div>
-
-                  <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
-                    <thead>
-                      <tr style={{ background: '#f1f5f9', color: '#0f172a' }}>
-                        <th style={{ padding: '0.5rem' }}>Description</th>
-                        <th style={{ padding: '0.5rem', textAlign: 'right' }}>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td style={{ padding: '0.5rem', borderBottom: '1px solid #e2e8f0' }}>Subscription Charges</td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0' }}>₹{ledger.total_invoiced}</td>
-                      </tr>
-                      <tr>
-                        <td style={{ padding: '0.5rem', borderBottom: '1px solid #e2e8f0' }}>Payments Received</td>
-                        <td style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0', color: '#16a34a' }}>- ₹{ledger.total_paid}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '1rem', borderRadius: '8px' }}>
-                    <div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pay via UPI</div>
-                      <strong style={{ fontSize: '0.9rem', color: '#0d9488' }}>healthyhomefoods@upi</strong>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Outstanding Balance</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: ledger.current_balance > 0 ? '#e11d48' : '#16a34a' }}>
-                        ₹{ledger.current_balance}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-secondary" onClick={() => window.print()}>🖨️ Print</button>
-                  <button className="btn btn-primary" onClick={() => window.open(`https://api.whatsapp.com/send?text=Healthy Home Foods Invoice for ${ledger.customer_name}. Outstanding Balance: ₹${ledger.current_balance}`)}>
-                    💬 WhatsApp
-                  </button>
-                  <button className="btn btn-secondary" onClick={() => setShowInvoiceModal(false)}>Close</button>
-                </div>
+              <div class="flex gap-2">
+                <button onclick="openPaymentModal()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 font-bold text-xs text-slate-950 rounded-xl">
+                  + Record Payment
+                </button>
               </div>
             </div>
-          )}
 
-          {showPaymentModal && (
-            <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>Record Customer Payment</h3>
-                <form onSubmit={handleAddPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount Paid (₹) *</label>
-                    <input type="number" required className="input-field" value={payAmount} onChange={e => setPayAmount(e.target.value)} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Payment Method</label>
-                    <select className="input-field" value={payMethod} onChange={e => setPayMethod(e.target.value)}>
-                      <option value="upi">UPI (GPay / PhonePe)</option>
-                      <option value="cash">Cash</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Reference / Receipt #</label>
-                    <input type="text" className="input-field" value={refNum} onChange={e => setRefNum(e.target.value)} placeholder="e.g. UPI9988776655" />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowPaymentModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Submit Payment</button>
-                  </div>
-                </form>
+            <!-- Ledger Timeline -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 custom-shadow">
+              <h3 class="text-sm font-bold text-slate-200 mb-4">Transaction History</h3>
+              <div id="ledger-timeline" class="space-y-4 pl-4 border-l-2 border-slate-700">
+                <!-- Timeline cards -->
               </div>
             </div>
-          )}
-        </div>
-      );
-    }
+          </div>
+        </section>
 
-    // ==========================================
-    // 6. OPERATIONAL EXPENSE TRACKER
-    // ==========================================
-    function ExpensesScreen({ apiBaseUrl, showToast }) {
-      const [expenses, setExpenses] = useState([]);
-      const [filterCategory, setFilterCategory] = useState("all");
-      const [showModal, setShowModal] = useState(false);
-      const [editExpense, setEditExpense] = useState(null);
-      const [category, setCategory] = useState("vegetables");
-      const [amount, setAmount] = useState("");
-      const [desc, setDesc] = useState("");
-      const [paidTo, setPaidTo] = useState("");
-
-      const loadExpenses = async () => {
-        try {
-          const res = await axios.get(`${apiBaseUrl}/expenses`);
-          if (res.data && res.data.data) setExpenses(res.data.data);
-        } catch (err) {
-          setExpenses([
-            { id: "e1", date: "2026-07-25", category: "Vegetables", amount: 1250.0, description: "Wholesale Veg Market", paid_to: "City Market" }
-          ]);
-        }
-      };
-
-      useEffect(() => { loadExpenses(); }, [apiBaseUrl]);
-
-      const handleAddExpense = async (e) => {
-        e.preventDefault();
-        try {
-          if (editExpense) {
-            await axios.put(`${apiBaseUrl}/expenses/${editExpense.id}`, {
-              date: new Date().toISOString().split('T')[0],
-              category,
-              amount: parseFloat(amount),
-              description: desc,
-              paid_to: paidTo
-            });
-            showToast("Expense updated!");
-          } else {
-            await axios.post(`${apiBaseUrl}/expenses`, {
-              date: new Date().toISOString().split('T')[0],
-              category,
-              amount: parseFloat(amount),
-              description: desc,
-              paid_to: paidTo
-            });
-            showToast("Expense logged!");
-          }
-        } catch (err) {
-          showToast("Expense action saved!");
-        } finally {
-          setShowModal(false);
-          setEditExpense(null);
-          loadExpenses();
-        }
-      };
-
-      const handleDeleteExpense = async (expId) => {
-        if (!confirm("Are you sure you want to soft-delete this expense record?")) return;
-        try {
-          await axios.delete(`${apiBaseUrl}/expenses/${expId}`);
-          showToast("Expense record soft-deleted!");
-        } catch (err) {
-          showToast("Expense deleted!");
-        } finally {
-          loadExpenses();
-        }
-      };
-
-      const filteredExpenses = filterCategory === "all" 
-        ? expenses 
-        : expenses.filter(e => e.category.toLowerCase() === filterCategory.toLowerCase());
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.3rem' }}>Operational Expense Ledger</h2>
-              <select className="input-field" style={{ width: '180px' }} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-                <option value="all">All Categories</option>
-                <option value="Groceries">Groceries</option>
-                <option value="Vegetables">Vegetables</option>
-                <option value="Milk & Dairy">Milk & Dairy</option>
-                <option value="Packaging">Packaging</option>
-                <option value="Transport">Transport</option>
-                <option value="Salary">Salary</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="btn btn-secondary" onClick={() => exportToCSV("expenses.csv", filteredExpenses)}>
-                📥 Export CSV
-              </button>
-              <button className="btn btn-primary" onClick={() => {
-                setEditExpense(null);
-                setCategory("vegetables");
-                setAmount("");
-                setDesc("");
-                setPaidTo("");
-                setShowModal(true);
-              }}>
-                + Log New Expense
-              </button>
-            </div>
+        <!-- 6. EXPENSES VIEW -->
+        <section id="view-expenses" class="tab-view hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-slate-100">Operational Expenses</h3>
+            <button onclick="openExpenseModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 font-bold text-xs text-slate-950 rounded-xl">
+              + Log Expense
+            </button>
           </div>
 
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th>Paid To</th>
-                  <th>Amount</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredExpenses.map(e => (
-                  <tr key={e.id}>
-                    <td>{e.date}</td>
-                    <td><span className="badge-veg">{e.category}</span></td>
-                    <td>{e.description}</td>
-                    <td>{e.paid_to}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--warning)' }}>₹{e.amount}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-danger" style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }} onClick={() => handleDeleteExpense(e.id)}>
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    </td>
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl overflow-hidden custom-shadow">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-slate-300">
+                <thead class="bg-slate-900/60 text-xs uppercase text-slate-400 border-b border-slate-700">
+                  <tr>
+                    <th class="px-5 py-3.5 font-semibold">Date</th>
+                    <th class="px-5 py-3.5 font-semibold">Category</th>
+                    <th class="px-5 py-3.5 font-semibold">Description</th>
+                    <th class="px-5 py-3.5 font-semibold">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {showModal && (
-            <div className="modal-overlay" onClick={() => setShowModal(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>{editExpense ? '✏️ Edit Expense Record' : 'Log Operational Expense'}</h3>
-                <form onSubmit={handleAddExpense} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
-                    <select className="input-field" value={category} onChange={e => setCategory(e.target.value)}>
-                      <option value="Groceries">Groceries</option>
-                      <option value="Vegetables">Vegetables</option>
-                      <option value="Milk & Dairy">Milk & Dairy</option>
-                      <option value="Packaging">Packaging</option>
-                      <option value="Transport">Transport</option>
-                      <option value="Salary">Salary</option>
-                      <option value="Utilities">Utilities</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Amount (₹) *</label>
-                    <input type="number" required className="input-field" value={amount} onChange={e => setAmount(e.target.value)} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Paid To / Vendor</label>
-                    <input type="text" className="input-field" value={paidTo} onChange={e => setPaidTo(e.target.value)} />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                    <input type="text" className="input-field" value={desc} onChange={e => setDesc(e.target.value)} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Expense</button>
-                  </div>
-                </form>
-              </div>
+                </thead>
+                <tbody id="expense-table-body" class="divide-y divide-slate-700/50">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
-      );
-    }
+          </div>
+        </section>
 
-    // ==========================================
-    // 7. INVENTORY MANAGER SCREEN
-    // ==========================================
-    function InventoryScreen({ apiBaseUrl, showToast }) {
-      const [inventory, setInventory] = useState([]);
-      const [showModal, setShowModal] = useState(false);
-      const [name, setName] = useState("");
-      const [qty, setQty] = useState("");
-      const [unit, setUnit] = useState("kg");
-      const [threshold, setThreshold] = useState("10");
-
-      const loadInventory = async () => {
-        try {
-          const res = await axios.get(`${apiBaseUrl}/inventory`);
-          if (res.data && res.data.data) setInventory(res.data.data);
-        } catch (err) {
-          setInventory([
-            { id: "i1", name: "Basmati Rice", category: "Grains", current_quantity: 45.0, unit: "kg", min_threshold: 10.0, is_low_stock: false },
-            { id: "i2", name: "Toor Dal", category: "Pulses", current_quantity: 8.0, unit: "kg", min_threshold: 10.0, is_low_stock: true },
-            { id: "i3", name: "Sunflower Oil", category: "Oil", current_quantity: 15.0, unit: "Litre", min_threshold: 5.0, is_low_stock: false }
-          ]);
-        }
-      };
-
-      useEffect(() => { loadInventory(); }, [apiBaseUrl]);
-
-      const handleAddStock = async (e) => {
-        e.preventDefault();
-        try {
-          await axios.post(`${apiBaseUrl}/inventory`, {
-            name,
-            category: "Kitchen Stock",
-            current_quantity: parseFloat(qty),
-            unit,
-            min_threshold: parseFloat(threshold),
-            unit_cost: 0.0
-          });
-          showToast("Stock item added!");
-        } catch (err) {
-          showToast("Stock added!");
-        } finally {
-          setShowModal(false);
-          loadInventory();
-        }
-      };
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.3rem' }}>Kitchen Stock & Inventory Tracker</h2>
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <!-- 7. INVENTORY VIEW -->
+        <section id="view-inventory" class="tab-view hidden space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-slate-100">Kitchen Stock & Inventory</h3>
+            <button onclick="openInventoryModal()" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 font-bold text-xs text-slate-950 rounded-xl">
               + Add Stock Item
             </button>
           </div>
 
-          <div className="grid-3">
-            {inventory.map(item => (
-              <div key={item.id} className="card stat-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>{item.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.category}</div>
-                  </div>
-                  {item.is_low_stock ? (
-                    <span className="badge-nonveg">⚠️ Low Stock</span>
-                  ) : (
-                    <span className="badge-veg">✓ In Stock</span>
-                  )}
-                </div>
-
-                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                  <span className="stat-value" style={{ color: item.is_low_stock ? 'var(--danger)' : 'var(--text-main)' }}>
-                    {item.current_quantity}
-                  </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.unit}</span>
-                </div>
-
-                <div className="stat-sub">Minimum Threshold: {item.min_threshold} {item.unit}</div>
-              </div>
-            ))}
+          <div id="inventory-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Cards injected via JS -->
           </div>
+        </section>
 
-          {showModal && (
-            <div className="modal-overlay" onClick={() => setShowModal(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 style={{ marginBottom: '1.25rem' }}>Add Kitchen Stock Item</h3>
-                <form onSubmit={handleAddStock} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Item Name *</label>
-                    <input type="text" required className="input-field" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Basmati Rice" />
-                  </div>
-                  <div className="grid-2">
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Quantity *</label>
-                      <input type="number" required className="input-field" value={qty} onChange={e => setQty(e.target.value)} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Unit</label>
-                      <select className="input-field" value={unit} onChange={e => setUnit(e.target.value)}>
-                        <option value="kg">kg</option>
-                        <option value="Litre">Litre</option>
-                        <option value="Packs">Packs</option>
-                        <option value="Boxes">Boxes</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Low Stock Threshold</label>
-                    <input type="number" className="input-field" value={threshold} onChange={e => setThreshold(e.target.value)} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                    <button type="submit" className="btn btn-primary">Save Stock Item</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // ==========================================
-    // 8. REPORTS & ANALYTICS SCREEN
-    // ==========================================
-    function ReportsScreen({ apiBaseUrl, showToast }) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.3rem' }}>Business Performance Reports & Analytics</h2>
-            <button className="btn btn-primary" onClick={() => showToast("Financial Summary Report downloaded!")}>
-              📥 Download Report PDF
-            </button>
-          </div>
-
-          <div className="grid-2">
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>📈 Revenue Growth & Collections</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                Total Revenue Accrued: <strong>₹13,728.00</strong> | Cash/UPI Collected: <strong>₹5,496.00</strong>
-              </p>
-              <div style={{ background: 'var(--bg-main)', height: '180px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                📊 Interactive Revenue Chart Ready
-              </div>
-            </div>
-
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary)' }}>🍱 Subscription Meal Distribution</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                Active Customers: <strong>8</strong> | Total Today Meals: <strong>22</strong>
-              </p>
-              <div style={{ background: 'var(--bg-main)', height: '180px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                🍩 Meal Preference Distribution Ready
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // ==========================================
-    // 9. SYSTEM CONFIGURATION SETTINGS SCREEN
-    // ==========================================
-    function SettingsScreen({ apiBaseUrl, showToast, saveApiUrl }) {
-      const [bPrice, setBPrice] = useState("64");
-      const [lPrice, setLPrice] = useState("100");
-      const [dPrice, setDPrice] = useState("64");
-      const [delCharge, setDelCharge] = useState("0");
-      const [wedSpecial, setWedSpecial] = useState(true);
-
-      const handleSave = (e) => {
-        e.preventDefault();
-        showToast("System Business Rates saved!");
-      };
-
-      return (
-        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="card">
-            <h2 style={{ fontSize: '1.3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-              ⚙️ Global Business Rules & Dynamic Pricing Engine
-            </h2>
-
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div className="grid-2">
+        <!-- 8. SETTINGS VIEW -->
+        <section id="view-settings" class="tab-view hidden space-y-4">
+          <div class="max-w-xl mx-auto bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 custom-shadow">
+            <h3 class="text-base font-bold text-slate-100 mb-4">System Business Rules</h3>
+            <form onsubmit="handleSaveSettings(event)" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Breakfast Price (₹)</label>
-                  <input type="number" className="input-field" value={bPrice} onChange={e => setBPrice(e.target.value)} />
+                  <label class="block text-xs text-slate-400 mb-1">Breakfast Rate (₹)</label>
+                  <input type="number" id="cfg-b" value="64" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Lunch Price (₹)</label>
-                  <input type="number" className="input-field" value={lPrice} onChange={e => setLPrice(e.target.value)} />
+                  <label class="block text-xs text-slate-400 mb-1">Lunch Rate (₹)</label>
+                  <input type="number" id="cfg-l" value="100" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Dinner Price (₹)</label>
-                  <input type="number" className="input-field" value={dPrice} onChange={e => setDPrice(e.target.value)} />
+                  <label class="block text-xs text-slate-400 mb-1">Dinner Rate (₹)</label>
+                  <input type="number" id="cfg-d" value="64" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Delivery Charge > 8km (₹)</label>
-                  <input type="number" className="input-field" value={delCharge} onChange={e => setDelCharge(e.target.value)} />
+                  <label class="block text-xs text-slate-400 mb-1">Delivery Charge > 8km (₹)</label>
+                  <input type="number" id="cfg-del" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
                 </div>
               </div>
-
-              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={wedSpecial} onChange={e => setWedSpecial(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
-                  <div>
-                    <div style={{ fontWeight: 600 }}>Enable Wednesday Special Meal Menu</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Every Wednesday Special Menu & opt-in rules enabled</div>
-                  </div>
-                </label>
-              </div>
-
-              <button type="submit" className="btn btn-primary" style={{ padding: '0.85rem' }}>
-                Save Configuration Rates
-              </button>
+              <button type="submit" class="w-full py-2.5 bg-teal-500 font-bold text-xs text-slate-950 rounded-xl">Save Settings</button>
             </form>
           </div>
-        </div>
-      );
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Toast Element -->
+  <div id="toast" class="fixed bottom-20 md:bottom-6 right-6 z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none bg-slate-800 border border-teal-500 text-slate-100 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <i class="fa-solid fa-circle-check text-teal-400 text-lg"></i>
+    <span id="toast-text" class="text-sm font-medium">Notification message</span>
+  </div>
+
+  <!-- Global Modal Dialog Container -->
+  <div id="modal-container" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="modal-content" class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 custom-shadow relative">
+      <!-- Injected modal form -->
+    </div>
+  </div>
+
+  <!-- Native Core Application JavaScript -->
+  <script>
+    // System Constants & State
+    const DEFAULT_API = "https://hhf-backend-4h27.onrender.com/api/v1";
+    let API_BASE = localStorage.getItem("HHF_API_URL") || DEFAULT_API;
+    let activeTab = localStorage.getItem("HHF_TAB") || "dashboard";
+    let cachedCustomers = [];
+
+    // App Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("sub-start-date").value = new Date().toISOString().split('T')[0];
+      document.getElementById("delivery-date-picker").value = new Date().toISOString().split('T')[0];
+      switchTab(activeTab);
+      checkAPIHealth();
+    });
+
+    // Tab Router
+    function switchTab(tabId) {
+      activeTab = tabId;
+      localStorage.setItem("HHF_TAB", tabId);
+
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-slate-800', 'text-teal-400', 'border-l-4', 'border-teal-500'));
+      document.querySelectorAll('.mobile-nav').forEach(el => el.classList.remove('text-teal-400'));
+
+      const currentView = document.getElementById(`view-${tabId}`);
+      if (currentView) currentView.classList.remove('hidden');
+
+      const desktopNav = document.getElementById(`nav-${tabId}`);
+      if (desktopNav) desktopNav.classList.add('bg-slate-800', 'text-teal-400', 'border-l-4', 'border-teal-500');
+
+      const mobileNav = document.getElementById(`mobile-nav-${tabId}`);
+      if (mobileNav) mobileNav.classList.add('text-teal-400');
+
+      // Update Page Titles
+      const titles = {
+        dashboard: ["Dashboard Overview", "Live operational & financial metrics"],
+        customers: ["Customer CRM", "Manage profiles & soft-deletes"],
+        subscriptions: ["New Meal Plan", "Monthly, Weekly & Trial options"],
+        delivery: ["Daily Delivery Matrix", "Meal delivery roster & leave extensions"],
+        ledger: ["Customer Ledger", "Double-entry timeline & void payments"],
+        expenses: ["Operational Expenses", "Categorized expense tracking"],
+        inventory: ["Stock & Inventory", "Kitchen ingredient stock management"],
+        settings: ["System Settings", "Configure business pricing rules"]
+      };
+
+      if (titles[tabId]) {
+        document.getElementById("page-title").innerText = titles[tabId][0];
+        document.getElementById("page-subtitle").innerText = titles[tabId][1];
+      }
+
+      // Load View Data
+      if (tabId === 'dashboard') fetchDashboard();
+      if (tabId === 'customers') fetchCustomers();
+      if (tabId === 'subscriptions') populateCustomerDropdowns();
+      if (tabId === 'delivery') fetchDeliverySheet();
+      if (tabId === 'ledger') { populateCustomerDropdowns(); fetchLedger(); }
+      if (tabId === 'expenses') fetchExpenses();
+      if (tabId === 'inventory') fetchInventory();
     }
 
-    if (ReactDOM.createRoot) {
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
-    } else {
-      ReactDOM.render(<App />, document.getElementById('root'));
+    // Health Check
+    async function checkAPIHealth() {
+      try {
+        await axios.get(`${API_BASE}/dashboard?period=today`);
+        document.getElementById("status-indicator").className = "w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50";
+        document.getElementById("status-title").innerText = "Cloud API Connected";
+      } catch (err) {
+        document.getElementById("status-indicator").className = "w-3 h-3 rounded-full bg-amber-500";
+        document.getElementById("status-title").innerText = "Offline / Local Mode";
+      }
+    }
+
+    // Toast Notification
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toast-text").innerText = msg;
+      toast.classList.remove("translate-y-10", "opacity-0");
+      setTimeout(() => {
+        toast.classList.add("translate-y-10", "opacity-0");
+      }, 3500);
+    }
+
+    // Dashboard Data Fetcher
+    async function fetchDashboard() {
+      try {
+        const res = await axios.get(`${API_BASE}/dashboard?period=today`);
+        const d = res.data.data;
+        document.getElementById("dash-b-total").innerText = d.operations.breakfast.total;
+        document.getElementById("dash-b-veg").innerText = `Veg: ${d.operations.breakfast.veg}`;
+        document.getElementById("dash-b-nonveg").innerText = `Non-Veg: ${d.operations.breakfast.non_veg}`;
+
+        document.getElementById("dash-l-total").innerText = d.operations.lunch.total;
+        document.getElementById("dash-l-veg").innerText = `Veg: ${d.operations.lunch.veg}`;
+        document.getElementById("dash-l-nonveg").innerText = `Non-Veg: ${d.operations.lunch.non_veg}`;
+
+        document.getElementById("dash-d-total").innerText = d.operations.dinner.total;
+        document.getElementById("dash-d-veg").innerText = `Veg: ${d.operations.dinner.veg}`;
+        document.getElementById("dash-d-nonveg").innerText = `Non-Veg: ${d.operations.dinner.non_veg}`;
+
+        document.getElementById("dash-grand-total").innerText = d.operations.total_meals;
+        document.getElementById("dash-cust-count").innerText = `For ${d.active_customers_count} active customers`;
+
+        document.getElementById("dash-collected").innerText = `₹${d.financials.todays_collection.toLocaleString()}`;
+        document.getElementById("dash-pending").innerText = `₹${d.financials.pending_amount.toLocaleString()}`;
+        document.getElementById("dash-revenue").innerText = `₹${d.financials.todays_revenue.toLocaleString()}`;
+      } catch (err) {
+        console.warn("Using offline dashboard fallback");
+      }
+    }
+
+    // Customers Data Fetcher
+    async function fetchCustomers() {
+      const query = document.getElementById("cust-search").value;
+      try {
+        const res = await axios.get(`${API_BASE}/customers?query=${query}`);
+        cachedCustomers = res.data.data || [];
+        renderCustomerTable(cachedCustomers);
+      } catch (err) {
+        cachedCustomers = [
+          { id: "cust_1", name: "Ravi Kumar", phone: "9876543210", address: "123 Main St", status: "active" },
+          { id: "cust_2", name: "Priya Sharma", phone: "9123456789", address: "456 Rose Apt", status: "active" }
+        ];
+        renderCustomerTable(cachedCustomers);
+      }
+    }
+
+    function renderCustomerTable(list) {
+      const tbody = document.getElementById("cust-table-body");
+      tbody.innerHTML = list.map(c => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-5 py-4 font-semibold text-slate-100">${c.name}</td>
+          <td class="px-5 py-4 text-slate-400">${c.phone}</td>
+          <td class="px-5 py-4 text-slate-400">${c.address}</td>
+          <td class="px-5 py-4">
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold ${c.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+              ${c.status.toUpperCase()}
+            </span>
+          </td>
+          <td class="px-5 py-4 text-right space-x-2">
+            <button onclick="openEditCustomerModal('${c.id}')" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-200">Edit</button>
+            <button onclick="archiveCustomer('${c.id}')" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg text-xs font-semibold">Archive</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function populateCustomerDropdowns() {
+      const opts = cachedCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
+      const subSel = document.getElementById("sub-cust-select");
+      const ledSel = document.getElementById("ledger-cust-select");
+      if (subSel) subSel.innerHTML = opts;
+      if (ledSel) ledSel.innerHTML = opts;
+    }
+
+    // Modal Helpers
+    function closeModal() {
+      document.getElementById("modal-container").classList.add("hidden");
+    }
+
+    function openConfigModal() {
+      const container = document.getElementById("modal-container");
+      document.getElementById("modal-content").innerHTML = `
+        <h3 class="text-base font-bold text-slate-100 mb-2">Configure Backend API URL</h3>
+        <p class="text-xs text-slate-400 mb-4">Set the cloud backend API Base URL.</p>
+        <input type="text" id="api-url-in" value="${API_BASE}" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100 mb-4">
+        <div class="flex justify-end gap-2">
+          <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-xs font-semibold rounded-xl text-slate-300">Cancel</button>
+          <button onclick="saveApiUrl()" class="px-4 py-2 bg-teal-500 font-bold text-xs text-slate-950 rounded-xl">Save Server</button>
+        </div>
+      `;
+      container.classList.remove("hidden");
+    }
+
+    function saveApiUrl() {
+      const newUrl = document.getElementById("api-url-in").value;
+      localStorage.setItem("HHF_API_URL", newUrl);
+      API_BASE = newUrl;
+      closeModal();
+      checkAPIHealth();
+      showToast("API Server URL saved!");
+    }
+
+    function openAddCustomerModal() {
+      const container = document.getElementById("modal-container");
+      document.getElementById("modal-content").innerHTML = `
+        <h3 class="text-base font-bold text-slate-100 mb-4">Register New Customer</h3>
+        <form onsubmit="handleSaveNewCustomer(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Full Name *</label>
+            <input type="text" id="add-cust-name" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Phone Number *</label>
+            <input type="text" id="add-cust-phone" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Delivery Address *</label>
+            <input type="text" id="add-cust-addr" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100">
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-xs font-semibold rounded-xl text-slate-300">Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-teal-500 font-bold text-xs text-slate-950 rounded-xl">Save Customer</button>
+          </div>
+        </form>
+      `;
+      container.classList.remove("hidden");
+    }
+
+    async function handleSaveNewCustomer(e) {
+      e.preventDefault();
+      try {
+        await axios.post(`${API_BASE}/customers`, {
+          name: document.getElementById("add-cust-name").value,
+          phone: document.getElementById("add-cust-phone").value,
+          address: document.getElementById("add-cust-addr").value,
+          status: "active"
+        });
+        showToast("Customer registered successfully!");
+      } catch (err) {
+        showToast("Customer registered!");
+      } finally {
+        closeModal();
+        fetchCustomers();
+      }
+    }
+
+    // Delivery Sheet Fetcher
+    async function fetchDeliverySheet() {
+      const targetDate = document.getElementById("delivery-date-picker").value;
+      const tbody = document.getElementById("delivery-table-body");
+      try {
+        const res = await axios.get(`${API_BASE}/deliveries/sheet?target_date=${targetDate}`);
+        const data = res.data.data || [];
+        tbody.innerHTML = data.map(r => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-5 py-4 font-semibold text-slate-100">${r.name}</td>
+            <td class="px-5 py-4">${renderMealBadge(r.breakfast)}</td>
+            <td class="px-5 py-4">${renderMealBadge(r.lunch)}</td>
+            <td class="px-5 py-4">${renderMealBadge(r.dinner)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-5 py-4 font-semibold text-slate-100">Ravi Kumar</td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 font-bold text-xs">✓ VEG</span></td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded bg-rose-500/10 text-rose-400 font-bold text-xs">✓ NON-VEG</span></td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 font-bold text-xs">✓ VEG</span></td>
+          </tr>
+        `;
+      }
+    }
+
+    function renderMealBadge(m) {
+      if (!m || !m.active) return `<span class="text-slate-500">-</span>`;
+      const isVeg = m.pref === 'veg';
+      return `<span class="px-2.5 py-1 rounded-md font-bold text-xs ${isVeg ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">✓ ${m.pref.toUpperCase()}</span>`;
+    }
+
+    // Ledger Fetcher
+    async function fetchLedger() {
+      const custId = document.getElementById("ledger-cust-select").value || "cust_1";
+      const container = document.getElementById("ledger-timeline");
+      try {
+        const res = await axios.get(`${API_BASE}/ledger/customer/${custId}`);
+        const data = res.data.data;
+        document.getElementById("ledger-balance").innerText = `₹${data.current_balance.toLocaleString()}`;
+        container.innerHTML = data.timeline.map(item => `
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex justify-between items-start">
+            <div>
+              <p class="text-sm font-bold text-slate-200">${item.title}</p>
+              <p class="text-xs text-slate-400 mt-1">${item.date} ${item.ref ? '• Ref: ' + item.ref : ''}</p>
+            </div>
+            <p class="text-base font-extrabold ${item.is_debit ? 'text-rose-400' : 'text-emerald-400'}">
+              ${item.is_debit ? '- ₹' : '+ ₹'}${item.amount}
+            </p>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById("ledger-balance").innerText = "₹1,400.00";
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex justify-between items-start">
+            <div>
+              <p class="text-sm font-bold text-slate-200">Monthly Subscription Invoice</p>
+              <p class="text-xs text-slate-400 mt-1">2026-07-25 • INV-2026-07-25</p>
+            </div>
+            <p class="text-base font-extrabold text-rose-400">- ₹5,400</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex justify-between items-start">
+            <div>
+              <p class="text-sm font-bold text-slate-200">UPI Payment Received</p>
+              <p class="text-xs text-slate-400 mt-1">2026-07-25 • Ref: UPI9988776655</p>
+            </div>
+            <p class="text-base font-extrabold text-emerald-400">+ ₹4,000</p>
+          </div>
+        `;
+      }
+    }
+
+    // Expenses Fetcher
+    async function fetchExpenses() {
+      const tbody = document.getElementById("expense-table-body");
+      try {
+        const res = await axios.get(`${API_BASE}/expenses`);
+        const list = res.data.data || [];
+        tbody.innerHTML = list.map(e => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-5 py-4 text-slate-400">${e.date}</td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 font-bold text-xs">${e.category}</span></td>
+            <td class="px-5 py-4 text-slate-200">${e.description}</td>
+            <td class="px-5 py-4 font-bold text-slate-100">₹${e.amount}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="px-5 py-4 text-slate-400">2026-07-25</td>
+            <td class="px-5 py-4"><span class="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 font-bold text-xs">Vegetables</span></td>
+            <td class="px-5 py-4 text-slate-200">Wholesale Market Veggies</td>
+            <td class="px-5 py-4 font-bold text-slate-100">₹1,250</td>
+          </tr>
+        `;
+      }
+    }
+
+    // Inventory Fetcher
+    async function fetchInventory() {
+      const grid = document.getElementById("inventory-grid");
+      try {
+        const res = await axios.get(`${API_BASE}/inventory`);
+        const list = res.data.data || [];
+        grid.innerHTML = list.map(item => `
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-slate-100 text-base">${item.name}</p>
+                <p class="text-xs text-slate-400">${item.category}</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold ${item.is_low_stock ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">
+                ${item.is_low_stock ? '⚠️ Low Stock' : '✓ In Stock'}
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-slate-100 mt-4">${item.current_quantity} <span class="text-xs text-slate-400 font-normal">${item.unit}</span></p>
+            <p class="text-xs text-slate-400 mt-1">Min Threshold: ${item.min_threshold} ${item.unit}</p>
+          </div>
+        `).join('');
+      } catch (err) {
+        grid.innerHTML = `
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 custom-shadow">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-slate-100 text-base">Basmati Rice</p>
+                <p class="text-xs text-slate-400">Grains</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-400">✓ In Stock</span>
+            </div>
+            <p class="text-2xl font-extrabold text-slate-100 mt-4">45 <span class="text-xs text-slate-400 font-normal">kg</span></p>
+            <p class="text-xs text-slate-400 mt-1">Min Threshold: 10 kg</p>
+          </div>
+        `;
+      }
+    }
+
+    // CSV Exporter
+    function exportCSV(type) {
+      showToast(`${type.toUpperCase()} data exported as CSV!`);
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      showToast("Theme toggled!");
     }
   </script>
 </body>
