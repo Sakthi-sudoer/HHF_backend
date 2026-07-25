@@ -1,0 +1,615 @@
+{
+  "info": {
+    "name": "Food Subscription & Ledger Management API Collection",
+    "description": "Production Postman collection for Healthy Home's Foods Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "[Dashboard Engine] Get dashboard operations & financial stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/dashboard",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "dashboard"
+          ]
+        },
+        "description": "Fetches real-time dashboard data including:\n- Today's Meal Operational Counts (Breakfast, Lunch, Dinner with Veg/Non-Veg breakdown)\n- Financial Summary Cards (Today's Collection, Pending Amount, Today's Revenue, Total Expenses, Profit = Revenue - Expenses)\n- Active vs Paused customer counts."
+      }
+    },
+    {
+      "name": "[Customer Management] Create a new customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        },
+        "description": "Creates a new customer profile.\nAutomatically initializes customer with active status."
+      }
+    },
+    {
+      "name": "[Customer Management] Search & list customers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        },
+        "description": "Retrieves all active customers, with optional instant filtering by query string."
+      }
+    },
+    {
+      "name": "[Customer Management] Get customer details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{customer_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{customer_id}"
+          ]
+        },
+        "description": "Fetches detailed profile information for a single customer."
+      }
+    },
+    {
+      "name": "[Customer Management] Update customer details",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{customer_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{customer_id}"
+          ]
+        },
+        "description": "Updates editable fields of an existing customer profile."
+      }
+    },
+    {
+      "name": "[Customer Management] Archive customer (Soft Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{customer_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{customer_id}"
+          ]
+        },
+        "description": "Soft-deletes / archives a customer profile without losing financial or delivery history."
+      }
+    },
+    {
+      "name": "[Subscription Engine] Create customer subscription",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/subscriptions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscriptions"
+          ]
+        },
+        "description": "Creates a new subscription (Monthly, Weekly, Trial, Custom).\nAutomatically calculates start/end dates, Sunday holiday skips, custom rate overrides, and initial invoice."
+      }
+    },
+    {
+      "name": "[Subscription Engine] Get subscription details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/subscriptions/{subscription_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "subscriptions",
+            "{subscription_id}"
+          ]
+        },
+        "description": "Retrieves full details of a subscription including pending extension counters and calculated end date."
+      }
+    },
+    {
+      "name": "[Daily Delivery Sheet Engine] Get daily delivery sheet",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/deliveries/sheet",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "deliveries",
+            "sheet"
+          ]
+        },
+        "description": "Fetches or auto-generates the daily delivery sheet for all active customer subscriptions.\nAutomatically applies meal rules and Sunday holiday skips."
+      }
+    },
+    {
+      "name": "[Daily Delivery Sheet Engine] Cancel meal & trigger subscription extension",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/deliveries/cancel-meal",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "deliveries",
+            "cancel-meal"
+          ]
+        },
+        "description": "Cancels a specific meal (Breakfast, Lunch, Dinner).\nTriggers automatic or manual subscription extension (+1 meal working day skipping Sundays).\nReturns rich metadata for frontend independence."
+      }
+    },
+    {
+      "name": "[Invoice Engine] Generate initial invoice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/invoices/generate/{subscription_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "invoices",
+            "generate",
+            "{subscription_id}"
+          ]
+        },
+        "description": "Generates an itemized invoice for a subscription based on selected meals, days, rates, and delivery charges."
+      }
+    },
+    {
+      "name": "[Invoice Engine] Recalculate invoice after meal cancellations",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/invoices/recalculate/{subscription_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "invoices",
+            "recalculate",
+            "{subscription_id}"
+          ]
+        },
+        "description": "Recalculates invoice after meal cancellations or early termination.\nComputes consumed meals, unused credits, delivery adjustments, refund due, or pending amount."
+      }
+    },
+    {
+      "name": "[Ledger Engine] Get customer ledger statement",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/ledger/customer/{customer_id}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "ledger",
+            "customer",
+            "{customer_id}"
+          ]
+        },
+        "description": "Retrieves GPay-style double-entry ledger timeline, active invoice breakdown, payment history, total invoiced, total paid, and current pending balance."
+      }
+    },
+    {
+      "name": "[Payment Engine] Record customer payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "payments"
+          ]
+        },
+        "description": "Records a payment against a customer's account (Cash, UPI, Bank Transfer, Cheque).\nGenerates a payment receipt number and updates the customer running balance."
+      }
+    },
+    {
+      "name": "[Expense Tracking] List recorded expenses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/expenses",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "expenses"
+          ]
+        },
+        "description": "Retrieves all recorded operational expenses."
+      }
+    },
+    {
+      "name": "[Expense Tracking] Record a operational expense",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/expenses",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "expenses"
+          ]
+        },
+        "description": "Records an operational expense (Groceries, Vegetables, Milk, Packaging, Transport, Salaries, Utilities)."
+      }
+    },
+    {
+      "name": "[Reports Engine] Generate financial & operational report",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/reports/financial",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "reports",
+            "financial"
+          ]
+        },
+        "description": "Generates detailed daily, weekly, or monthly financial and meal delivery breakdown reports."
+      }
+    },
+    {
+      "name": "[Reports Engine] Export report as CSV",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/reports/export/csv",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "reports",
+            "export",
+            "csv"
+          ]
+        },
+        "description": "Exports report metrics to a downloadable CSV file."
+      }
+    },
+    {
+      "name": "[Global System Settings] Get global settings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/settings",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "settings"
+          ]
+        },
+        "description": "Fetches global business defaults:\n- Default meal rates (Breakfast, Lunch, Dinner)\n- Three meal lunch discount rate\n- Sunday holiday toggle\n- Default monthly subscription days (26 days)\n- Default daily delivery charge"
+      }
+    },
+    {
+      "name": "[Global System Settings] Update global settings",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/settings",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "settings"
+          ]
+        },
+        "description": "Updates global pricing, delivery, and holiday rules."
+      }
+    },
+    {
+      "name": "[Health Check] Root",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": []
+        },
+        "description": ""
+      }
+    }
+  ]
+}

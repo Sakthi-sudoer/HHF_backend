@@ -1,0 +1,3029 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Food Subscription & Ledger Management System API",
+    "description": "Production-grade, Clean Architecture REST API for Food Subscription & Ledger Management System.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard Engine"
+        ],
+        "summary": "Get dashboard operations & financial stats",
+        "description": "Fetches real-time dashboard data including:\n- Today's Meal Operational Counts (Breakfast, Lunch, Dinner with Veg/Non-Veg breakdown)\n- Financial Summary Cards (Today's Collection, Pending Amount, Today's Revenue, Total Expenses, Profit = Revenue - Expenses)\n- Active vs Paused customer counts.",
+        "operationId": "get_dashboard_summary_api_v1_dashboard_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Financial filter: 'today', 'this_week', 'this_month', 'custom'",
+              "default": "today",
+              "title": "Period"
+            },
+            "description": "Financial filter: 'today', 'this_week', 'this_month', 'custom'"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start date if period is 'custom'",
+              "title": "Start Date"
+            },
+            "description": "Start date if period is 'custom'"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End date if period is 'custom'",
+              "title": "End Date"
+            },
+            "description": "End date if period is 'custom'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DashboardSummaryResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers": {
+      "post": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Create a new customer",
+        "description": "Creates a new customer profile.\nAutomatically initializes customer with active status.",
+        "operationId": "create_customer_api_v1_customers_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CustomerResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Search & list customers",
+        "description": "Retrieves all active customers, with optional instant filtering by query string.",
+        "operationId": "list_customers_api_v1_customers_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search term for name, phone, or address",
+              "title": "Query"
+            },
+            "description": "Search term for name, phone, or address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_List_CustomerResponse__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customers/{customer_id}": {
+      "get": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Get customer details",
+        "description": "Fetches detailed profile information for a single customer.",
+        "operationId": "get_customer_api_v1_customers__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Customer ID",
+              "title": "Customer Id"
+            },
+            "description": "Customer ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CustomerResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Update customer details",
+        "description": "Updates editable fields of an existing customer profile.",
+        "operationId": "update_customer_api_v1_customers__customer_id__put",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Customer ID",
+              "title": "Customer Id"
+            },
+            "description": "Customer ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CustomerResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Archive customer (Soft Delete)",
+        "description": "Soft-deletes / archives a customer profile without losing financial or delivery history.",
+        "operationId": "archive_customer_api_v1_customers__customer_id__delete",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Customer ID",
+              "title": "Customer Id"
+            },
+            "description": "Customer ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CustomerResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions": {
+      "post": {
+        "tags": [
+          "Subscription Engine"
+        ],
+        "summary": "Create customer subscription",
+        "description": "Creates a new subscription (Monthly, Weekly, Trial, Custom).\nAutomatically calculates start/end dates, Sunday holiday skips, custom rate overrides, and initial invoice.",
+        "operationId": "create_subscription_api_v1_subscriptions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_SubscriptionResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/{subscription_id}": {
+      "get": {
+        "tags": [
+          "Subscription Engine"
+        ],
+        "summary": "Get subscription details",
+        "description": "Retrieves full details of a subscription including pending extension counters and calculated end date.",
+        "operationId": "get_subscription_api_v1_subscriptions__subscription_id__get",
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Subscription ID",
+              "title": "Subscription Id"
+            },
+            "description": "Subscription ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_SubscriptionResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/deliveries/sheet": {
+      "get": {
+        "tags": [
+          "Daily Delivery Sheet Engine"
+        ],
+        "summary": "Get daily delivery sheet",
+        "description": "Fetches or auto-generates the daily delivery sheet for all active customer subscriptions.\nAutomatically applies meal rules and Sunday holiday skips.",
+        "operationId": "get_daily_sheet_api_v1_deliveries_sheet_get",
+        "parameters": [
+          {
+            "name": "target_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Target delivery date (YYYY-MM-DD)",
+              "title": "Target Date"
+            },
+            "description": "Target delivery date (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_List_DeliveryDailyRecord__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/deliveries/cancel-meal": {
+      "post": {
+        "tags": [
+          "Daily Delivery Sheet Engine"
+        ],
+        "summary": "Cancel meal & trigger subscription extension",
+        "description": "Cancels a specific meal (Breakfast, Lunch, Dinner).\nTriggers automatic or manual subscription extension (+1 meal working day skipping Sundays).\nReturns rich metadata for frontend independence.",
+        "operationId": "cancel_meal_api_v1_deliveries_cancel_meal_post",
+        "parameters": [
+          {
+            "name": "target_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Delivery date",
+              "title": "Target Date"
+            },
+            "description": "Delivery date"
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Customer ID",
+              "title": "Customer Id"
+            },
+            "description": "Customer ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryMealCancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_DeliveryUpdateResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invoices/generate/{subscription_id}": {
+      "post": {
+        "tags": [
+          "Invoice Engine"
+        ],
+        "summary": "Generate initial invoice",
+        "description": "Generates an itemized invoice for a subscription based on selected meals, days, rates, and delivery charges.",
+        "operationId": "generate_invoice_api_v1_invoices_generate__subscription_id__post",
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Subscription ID",
+              "title": "Subscription Id"
+            },
+            "description": "Subscription ID"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_InvoiceResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invoices/recalculate/{subscription_id}": {
+      "post": {
+        "tags": [
+          "Invoice Engine"
+        ],
+        "summary": "Recalculate invoice after meal cancellations",
+        "description": "Recalculates invoice after meal cancellations or early termination.\nComputes consumed meals, unused credits, delivery adjustments, refund due, or pending amount.",
+        "operationId": "recalculate_cancellation_invoice_api_v1_invoices_recalculate__subscription_id__post",
+        "parameters": [
+          {
+            "name": "subscription_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Subscription ID",
+              "title": "Subscription Id"
+            },
+            "description": "Subscription ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_InvoiceResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ledger/customer/{customer_id}": {
+      "get": {
+        "tags": [
+          "Ledger Engine"
+        ],
+        "summary": "Get customer ledger statement",
+        "description": "Retrieves GPay-style double-entry ledger timeline, active invoice breakdown, payment history, total invoiced, total paid, and current pending balance.",
+        "operationId": "get_customer_ledger_api_v1_ledger_customer__customer_id__get",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Customer ID",
+              "title": "Customer Id"
+            },
+            "description": "Customer ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CustomerLedgerSummary_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments": {
+      "post": {
+        "tags": [
+          "Payment Engine"
+        ],
+        "summary": "Record customer payment",
+        "description": "Records a payment against a customer's account (Cash, UPI, Bank Transfer, Cheque).\nGenerates a payment receipt number and updates the customer running balance.",
+        "operationId": "record_payment_api_v1_payments_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_PaymentResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expenses": {
+      "get": {
+        "tags": [
+          "Expense Tracking"
+        ],
+        "summary": "List recorded expenses",
+        "description": "Retrieves all recorded operational expenses.",
+        "operationId": "list_expenses_api_v1_expenses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_List_ExpenseResponse__"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Expense Tracking"
+        ],
+        "summary": "Record a operational expense",
+        "description": "Records an operational expense (Groceries, Vegetables, Milk, Packaging, Transport, Salaries, Utilities).",
+        "operationId": "create_expense_api_v1_expenses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpenseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_ExpenseResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/financial": {
+      "get": {
+        "tags": [
+          "Reports Engine"
+        ],
+        "summary": "Generate financial & operational report",
+        "description": "Generates detailed daily, weekly, or monthly financial and meal delivery breakdown reports.",
+        "operationId": "get_financial_report_api_v1_reports_financial_get",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Report start date (YYYY-MM-DD)",
+              "title": "Start Date"
+            },
+            "description": "Report start date (YYYY-MM-DD)"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Report end date (YYYY-MM-DD)",
+              "title": "End Date"
+            },
+            "description": "Report end date (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_FinancialReportSummary_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/export/csv": {
+      "get": {
+        "tags": [
+          "Reports Engine"
+        ],
+        "summary": "Export report as CSV",
+        "description": "Exports report metrics to a downloadable CSV file.",
+        "operationId": "export_report_csv_api_v1_reports_export_csv_get",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Start date",
+              "title": "Start Date"
+            },
+            "description": "Start date"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "End date",
+              "title": "End Date"
+            },
+            "description": "End date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "Global System Settings"
+        ],
+        "summary": "Get global settings",
+        "description": "Fetches global business defaults:\n- Default meal rates (Breakfast, Lunch, Dinner)\n- Three meal lunch discount rate\n- Sunday holiday toggle\n- Default monthly subscription days (26 days)\n- Default daily delivery charge",
+        "operationId": "get_global_settings_api_v1_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_GlobalSettings_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Global System Settings"
+        ],
+        "summary": "Update global settings",
+        "description": "Updates global pricing, delivery, and holiday rules.",
+        "operationId": "update_global_settings_api_v1_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_GlobalSettings_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Health Check"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse_CustomerLedgerSummary_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerLedgerSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[CustomerLedgerSummary]"
+      },
+      "ApiResponse_CustomerResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[CustomerResponse]"
+      },
+      "ApiResponse_DashboardSummaryResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DashboardSummaryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DashboardSummaryResponse]"
+      },
+      "ApiResponse_DeliveryUpdateResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryUpdateResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[DeliveryUpdateResponse]"
+      },
+      "ApiResponse_ExpenseResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExpenseResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[ExpenseResponse]"
+      },
+      "ApiResponse_FinancialReportSummary_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialReportSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[FinancialReportSummary]"
+      },
+      "ApiResponse_GlobalSettings_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GlobalSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[GlobalSettings]"
+      },
+      "ApiResponse_InvoiceResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InvoiceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[InvoiceResponse]"
+      },
+      "ApiResponse_List_CustomerResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CustomerResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[List[CustomerResponse]]"
+      },
+      "ApiResponse_List_DeliveryDailyRecord__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DeliveryDailyRecord"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[List[DeliveryDailyRecord]]"
+      },
+      "ApiResponse_List_ExpenseResponse__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExpenseResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[List[ExpenseResponse]]"
+      },
+      "ApiResponse_PaymentResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[PaymentResponse]"
+      },
+      "ApiResponse_SubscriptionResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Indicates whether the request was processed successfully",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response payload data"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable response message",
+            "default": ""
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "List of error messages or validation failures"
+          }
+        },
+        "type": "object",
+        "title": "ApiResponse[SubscriptionResponse]"
+      },
+      "CustomerCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "example": "Ravi Kumar"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone",
+            "example": "9876543210"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "example": "123 Main Street, Sector 4"
+          },
+          "landmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landmark",
+            "example": "Near City Park"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "phone",
+          "address"
+        ],
+        "title": "CustomerCreate"
+      },
+      "CustomerLedgerSummary": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "customer_phone": {
+            "type": "string",
+            "title": "Customer Phone"
+          },
+          "total_invoiced": {
+            "type": "number",
+            "title": "Total Invoiced"
+          },
+          "total_paid": {
+            "type": "number",
+            "title": "Total Paid"
+          },
+          "current_balance": {
+            "type": "number",
+            "title": "Current Balance"
+          },
+          "payment_status": {
+            "type": "string",
+            "title": "Payment Status",
+            "description": "'paid', 'partially_paid', 'overdue', 'advance'"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LedgerEntry"
+            },
+            "type": "array",
+            "title": "Entries"
+          },
+          "active_invoice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InvoiceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recent_payments": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentResponse"
+            },
+            "type": "array",
+            "title": "Recent Payments",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "customer_name",
+          "customer_phone",
+          "total_invoiced",
+          "total_paid",
+          "current_balance",
+          "payment_status",
+          "entries"
+        ],
+        "title": "CustomerLedgerSummary"
+      },
+      "CustomerResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "example": "Ravi Kumar"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone",
+            "example": "9876543210"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "example": "123 Main Street, Sector 4"
+          },
+          "landmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landmark",
+            "example": "Near City Park"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CustomerStatus",
+            "default": "active"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "phone",
+          "address",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CustomerResponse"
+      },
+      "CustomerStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "paused",
+          "cancelled",
+          "archived"
+        ],
+        "title": "CustomerStatus"
+      },
+      "CustomerUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "landmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landmark"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "CustomerUpdate"
+      },
+      "DailyReportItem": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "breakfast_count": {
+            "type": "integer",
+            "title": "Breakfast Count"
+          },
+          "lunch_count": {
+            "type": "integer",
+            "title": "Lunch Count"
+          },
+          "dinner_count": {
+            "type": "integer",
+            "title": "Dinner Count"
+          },
+          "total_meals": {
+            "type": "integer",
+            "title": "Total Meals"
+          },
+          "revenue": {
+            "type": "number",
+            "title": "Revenue"
+          },
+          "expenses": {
+            "type": "number",
+            "title": "Expenses"
+          },
+          "collections": {
+            "type": "number",
+            "title": "Collections"
+          },
+          "profit": {
+            "type": "number",
+            "title": "Profit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "breakfast_count",
+          "lunch_count",
+          "dinner_count",
+          "total_meals",
+          "revenue",
+          "expenses",
+          "collections",
+          "profit"
+        ],
+        "title": "DailyReportItem"
+      },
+      "DashboardSummaryResponse": {
+        "properties": {
+          "operations": {
+            "$ref": "#/components/schemas/OperationsTodayStats"
+          },
+          "financials": {
+            "$ref": "#/components/schemas/FinancialCardsStats"
+          },
+          "active_customers_count": {
+            "type": "integer",
+            "title": "Active Customers Count"
+          },
+          "paused_customers_count": {
+            "type": "integer",
+            "title": "Paused Customers Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operations",
+          "financials",
+          "active_customers_count",
+          "paused_customers_count"
+        ],
+        "title": "DashboardSummaryResponse"
+      },
+      "DeliveryDailyRecord": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "breakfast": {
+            "$ref": "#/components/schemas/DeliveryMealState"
+          },
+          "lunch": {
+            "$ref": "#/components/schemas/DeliveryMealState"
+          },
+          "dinner": {
+            "$ref": "#/components/schemas/DeliveryMealState"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "customer_id",
+          "subscription_id",
+          "customer_name",
+          "breakfast",
+          "lunch",
+          "dinner",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DeliveryDailyRecord"
+      },
+      "DeliveryMealCancelRequest": {
+        "properties": {
+          "meal_type": {
+            "type": "string",
+            "title": "Meal Type",
+            "description": "'breakfast', 'lunch', or 'dinner'"
+          },
+          "extension_mode": {
+            "type": "string",
+            "title": "Extension Mode",
+            "description": "'automatic' or 'manual'",
+            "default": "automatic"
+          },
+          "manual_extension_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Extension Date",
+            "description": "Required if extension_mode is 'manual'"
+          }
+        },
+        "type": "object",
+        "required": [
+          "meal_type"
+        ],
+        "title": "DeliveryMealCancelRequest"
+      },
+      "DeliveryMealState": {
+        "properties": {
+          "delivered": {
+            "type": "boolean",
+            "title": "Delivered"
+          },
+          "cancelled": {
+            "type": "boolean",
+            "title": "Cancelled",
+            "default": false
+          },
+          "preference": {
+            "$ref": "#/components/schemas/FoodPreference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "delivered",
+          "preference"
+        ],
+        "title": "DeliveryMealState"
+      },
+      "DeliveryUpdateResponse": {
+        "properties": {
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryDailyRecord"
+          },
+          "meal_cancelled": {
+            "type": "boolean",
+            "title": "Meal Cancelled"
+          },
+          "cancelled_meal_type": {
+            "type": "string",
+            "title": "Cancelled Meal Type"
+          },
+          "extension_created": {
+            "type": "boolean",
+            "title": "Extension Created"
+          },
+          "extension_mode": {
+            "type": "string",
+            "title": "Extension Mode"
+          },
+          "extension_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extension Date"
+          },
+          "pending_extensions_count": {
+            "type": "integer",
+            "title": "Pending Extensions Count"
+          },
+          "new_subscription_end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "New Subscription End Date"
+          },
+          "balance_updated": {
+            "type": "boolean",
+            "title": "Balance Updated"
+          },
+          "invoice_requires_regeneration": {
+            "type": "boolean",
+            "title": "Invoice Requires Regeneration",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "delivery",
+          "meal_cancelled",
+          "cancelled_meal_type",
+          "extension_created",
+          "extension_mode",
+          "pending_extensions_count",
+          "new_subscription_end_date",
+          "balance_updated"
+        ],
+        "title": "DeliveryUpdateResponse"
+      },
+      "ExpenseCreate": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": "groceries",
+            "example": "groceries"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount",
+            "example": 1200.0
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "example": "Rice & Vegetables purchase"
+          },
+          "paid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid To",
+            "example": "Local Vendor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "description"
+        ],
+        "title": "ExpenseCreate"
+      },
+      "ExpenseResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "paid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid To"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "category",
+          "amount",
+          "description",
+          "paid_to",
+          "created_at"
+        ],
+        "title": "ExpenseResponse"
+      },
+      "FinancialCardsStats": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "description": "'today', 'this_week', 'this_month', 'custom'"
+          },
+          "todays_collection": {
+            "type": "number",
+            "title": "Todays Collection",
+            "description": "Total payments received in period",
+            "default": 0.0
+          },
+          "pending_amount": {
+            "type": "number",
+            "title": "Pending Amount",
+            "description": "Total outstanding uncollected balance across all active customers",
+            "default": 0.0
+          },
+          "todays_revenue": {
+            "type": "number",
+            "title": "Todays Revenue",
+            "description": "Accrued meal revenue for period",
+            "default": 0.0
+          },
+          "total_expenses": {
+            "type": "number",
+            "title": "Total Expenses",
+            "description": "Total expenses recorded in period",
+            "default": 0.0
+          },
+          "profit": {
+            "type": "number",
+            "title": "Profit",
+            "description": "Revenue - Expenses = Profit",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "period"
+        ],
+        "title": "FinancialCardsStats"
+      },
+      "FinancialReportSummary": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "total_revenue": {
+            "type": "number",
+            "title": "Total Revenue"
+          },
+          "total_collections": {
+            "type": "number",
+            "title": "Total Collections"
+          },
+          "total_expenses": {
+            "type": "number",
+            "title": "Total Expenses"
+          },
+          "net_profit": {
+            "type": "number",
+            "title": "Net Profit"
+          },
+          "total_pending_balance": {
+            "type": "number",
+            "title": "Total Pending Balance"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DailyReportItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date",
+          "total_revenue",
+          "total_collections",
+          "total_expenses",
+          "net_profit",
+          "total_pending_balance",
+          "items"
+        ],
+        "title": "FinancialReportSummary"
+      },
+      "FoodPreference": {
+        "type": "string",
+        "enum": [
+          "veg",
+          "non_veg"
+        ],
+        "title": "FoodPreference"
+      },
+      "FoodPreferenceSelection": {
+        "properties": {
+          "breakfast": {
+            "$ref": "#/components/schemas/FoodPreference",
+            "default": "veg"
+          },
+          "lunch": {
+            "$ref": "#/components/schemas/FoodPreference",
+            "default": "non_veg"
+          },
+          "dinner": {
+            "$ref": "#/components/schemas/FoodPreference",
+            "default": "veg"
+          }
+        },
+        "type": "object",
+        "title": "FoodPreferenceSelection"
+      },
+      "GlobalSettings": {
+        "properties": {
+          "breakfast_price": {
+            "type": "number",
+            "title": "Breakfast Price",
+            "description": "Default price per breakfast meal",
+            "default": 64.0
+          },
+          "lunch_price": {
+            "type": "number",
+            "title": "Lunch Price",
+            "description": "Default price per lunch meal",
+            "default": 100.0
+          },
+          "dinner_price": {
+            "type": "number",
+            "title": "Dinner Price",
+            "description": "Default price per dinner meal",
+            "default": 64.0
+          },
+          "three_meal_lunch_discount_rate": {
+            "type": "number",
+            "title": "Three Meal Lunch Discount Rate",
+            "description": "Discounted lunch rate if all 3 meals selected",
+            "default": 80.0
+          },
+          "delivery_charge_per_day": {
+            "type": "number",
+            "title": "Delivery Charge Per Day",
+            "description": "Default daily delivery fee",
+            "default": 0.0
+          },
+          "default_monthly_days": {
+            "type": "integer",
+            "title": "Default Monthly Days",
+            "description": "Default active delivery days in a monthly subscription",
+            "default": 26
+          },
+          "sunday_holiday_enabled": {
+            "type": "boolean",
+            "title": "Sunday Holiday Enabled",
+            "description": "Automatically skip Sundays during delivery and extensions",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "GlobalSettings"
+      },
+      "GlobalSettingsUpdate": {
+        "properties": {
+          "breakfast_price": {
+            "type": "number",
+            "title": "Breakfast Price"
+          },
+          "lunch_price": {
+            "type": "number",
+            "title": "Lunch Price"
+          },
+          "dinner_price": {
+            "type": "number",
+            "title": "Dinner Price"
+          },
+          "three_meal_lunch_discount_rate": {
+            "type": "number",
+            "title": "Three Meal Lunch Discount Rate"
+          },
+          "delivery_charge_per_day": {
+            "type": "number",
+            "title": "Delivery Charge Per Day"
+          },
+          "default_monthly_days": {
+            "type": "integer",
+            "title": "Default Monthly Days"
+          },
+          "sunday_holiday_enabled": {
+            "type": "boolean",
+            "title": "Sunday Holiday Enabled"
+          }
+        },
+        "type": "object",
+        "title": "GlobalSettingsUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InvoiceBreakdown": {
+        "properties": {
+          "breakfast_total": {
+            "type": "number",
+            "title": "Breakfast Total"
+          },
+          "lunch_total": {
+            "type": "number",
+            "title": "Lunch Total"
+          },
+          "dinner_total": {
+            "type": "number",
+            "title": "Dinner Total"
+          },
+          "delivery_total": {
+            "type": "number",
+            "title": "Delivery Total"
+          },
+          "gross_amount": {
+            "type": "number",
+            "title": "Gross Amount"
+          },
+          "discount_amount": {
+            "type": "number",
+            "title": "Discount Amount",
+            "default": 0.0
+          },
+          "net_amount": {
+            "type": "number",
+            "title": "Net Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "breakfast_total",
+          "lunch_total",
+          "dinner_total",
+          "delivery_total",
+          "gross_amount",
+          "net_amount"
+        ],
+        "title": "InvoiceBreakdown"
+      },
+      "InvoiceCancellationSummary": {
+        "properties": {
+          "original_invoice_total": {
+            "type": "number",
+            "title": "Original Invoice Total"
+          },
+          "consumed_amount": {
+            "type": "number",
+            "title": "Consumed Amount"
+          },
+          "unused_meals_credit": {
+            "type": "number",
+            "title": "Unused Meals Credit"
+          },
+          "delivery_adjustment": {
+            "type": "number",
+            "title": "Delivery Adjustment"
+          },
+          "final_adjusted_invoice_total": {
+            "type": "number",
+            "title": "Final Adjusted Invoice Total"
+          },
+          "total_paid": {
+            "type": "number",
+            "title": "Total Paid"
+          },
+          "pending_balance": {
+            "type": "number",
+            "title": "Pending Balance"
+          },
+          "refund_due": {
+            "type": "number",
+            "title": "Refund Due"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_invoice_total",
+          "consumed_amount",
+          "unused_meals_credit",
+          "delivery_adjustment",
+          "final_adjusted_invoice_total",
+          "total_paid",
+          "pending_balance",
+          "refund_due"
+        ],
+        "title": "InvoiceCancellationSummary"
+      },
+      "InvoiceItem": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_price": {
+            "type": "number",
+            "title": "Unit Price"
+          },
+          "total_price": {
+            "type": "number",
+            "title": "Total Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "quantity",
+          "unit_price",
+          "total_price"
+        ],
+        "title": "InvoiceItem"
+      },
+      "InvoiceResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "invoice_number": {
+            "type": "string",
+            "title": "Invoice Number"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "subscription_id": {
+            "type": "string",
+            "title": "Subscription Id"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "customer_phone": {
+            "type": "string",
+            "title": "Customer Phone"
+          },
+          "billing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Billing Date"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/InvoiceBreakdown"
+          },
+          "cancellation_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InvoiceCancellationSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "'issued', 'partially_paid', 'paid', 'cancelled', 'adjusted'",
+            "default": "issued"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "invoice_number",
+          "customer_id",
+          "subscription_id",
+          "customer_name",
+          "customer_phone",
+          "billing_date",
+          "start_date",
+          "end_date",
+          "items",
+          "breakdown",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InvoiceResponse"
+      },
+      "LedgerEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "entry_type": {
+            "type": "string",
+            "title": "Entry Type"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "debit_amount": {
+            "type": "number",
+            "title": "Debit Amount",
+            "description": "Amount billed to customer (Invoice)",
+            "default": 0.0
+          },
+          "credit_amount": {
+            "type": "number",
+            "title": "Credit Amount",
+            "description": "Amount paid by customer (Payment)",
+            "default": 0.0
+          },
+          "running_balance": {
+            "type": "number",
+            "title": "Running Balance",
+            "description": "Post-transaction outstanding balance"
+          },
+          "reference_id": {
+            "type": "string",
+            "title": "Reference Id",
+            "description": "Associated Invoice or Payment ID"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "entry_type",
+          "customer_id",
+          "customer_name",
+          "description",
+          "running_balance",
+          "reference_id",
+          "created_at"
+        ],
+        "title": "LedgerEntry"
+      },
+      "MealSelection": {
+        "properties": {
+          "breakfast": {
+            "type": "boolean",
+            "title": "Breakfast",
+            "description": "Enable breakfast delivery",
+            "default": true
+          },
+          "lunch": {
+            "type": "boolean",
+            "title": "Lunch",
+            "description": "Enable lunch delivery",
+            "default": true
+          },
+          "dinner": {
+            "type": "boolean",
+            "title": "Dinner",
+            "description": "Enable dinner delivery",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "MealSelection"
+      },
+      "MealTypeStats": {
+        "properties": {
+          "veg": {
+            "type": "integer",
+            "title": "Veg",
+            "default": 0
+          },
+          "non_veg": {
+            "type": "integer",
+            "title": "Non Veg",
+            "default": 0
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "MealTypeStats"
+      },
+      "OperationsTodayStats": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "breakfast": {
+            "$ref": "#/components/schemas/MealTypeStats"
+          },
+          "lunch": {
+            "$ref": "#/components/schemas/MealTypeStats"
+          },
+          "dinner": {
+            "$ref": "#/components/schemas/MealTypeStats"
+          },
+          "total_meals": {
+            "type": "integer",
+            "title": "Total Meals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "breakfast",
+          "lunch",
+          "dinner",
+          "total_meals"
+        ],
+        "title": "OperationsTodayStats"
+      },
+      "PaymentCreate": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount",
+            "example": 3000.0
+          },
+          "payment_method": {
+            "type": "string",
+            "title": "Payment Method",
+            "default": "upi",
+            "example": "upi"
+          },
+          "payment_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Payment Date"
+          },
+          "reference_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Number",
+            "example": "UPI123456789"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "amount"
+        ],
+        "title": "PaymentCreate"
+      },
+      "PaymentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "receipt_number": {
+            "type": "string",
+            "title": "Receipt Number"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "payment_method": {
+            "type": "string",
+            "title": "Payment Method"
+          },
+          "payment_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Payment Date"
+          },
+          "reference_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Number"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "receipt_number",
+          "customer_id",
+          "customer_name",
+          "amount",
+          "payment_method",
+          "payment_date",
+          "reference_number",
+          "notes",
+          "created_at"
+        ],
+        "title": "PaymentResponse"
+      },
+      "SubscriptionCreate": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "subscription_type": {
+            "$ref": "#/components/schemas/SubscriptionType"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "meals": {
+            "$ref": "#/components/schemas/MealSelection"
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/FoodPreferenceSelection"
+          },
+          "rates": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionRates"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "custom_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Days",
+            "description": "Number of days if type is CUSTOM"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "subscription_type",
+          "start_date",
+          "meals",
+          "preferences"
+        ],
+        "title": "SubscriptionCreate"
+      },
+      "SubscriptionRates": {
+        "properties": {
+          "breakfast_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakfast Price",
+            "description": "Override global breakfast price"
+          },
+          "lunch_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lunch Price",
+            "description": "Override global lunch price"
+          },
+          "dinner_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dinner Price",
+            "description": "Override global dinner price"
+          },
+          "delivery_charge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Charge",
+            "description": "Override global delivery charge per day"
+          }
+        },
+        "type": "object",
+        "title": "SubscriptionRates"
+      },
+      "SubscriptionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "subscription_type": {
+            "$ref": "#/components/schemas/SubscriptionType"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "original_end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Original End Date"
+          },
+          "meals": {
+            "$ref": "#/components/schemas/MealSelection"
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/FoodPreferenceSelection"
+          },
+          "rates": {
+            "$ref": "#/components/schemas/SubscriptionRates"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "active"
+          },
+          "pending_breakfast_extensions": {
+            "type": "integer",
+            "title": "Pending Breakfast Extensions",
+            "default": 0
+          },
+          "pending_lunch_extensions": {
+            "type": "integer",
+            "title": "Pending Lunch Extensions",
+            "default": 0
+          },
+          "pending_dinner_extensions": {
+            "type": "integer",
+            "title": "Pending Dinner Extensions",
+            "default": 0
+          },
+          "total_extended_days": {
+            "type": "integer",
+            "title": "Total Extended Days",
+            "default": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "customer_id",
+          "subscription_type",
+          "start_date",
+          "end_date",
+          "original_end_date",
+          "meals",
+          "preferences",
+          "rates",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SubscriptionResponse"
+      },
+      "SubscriptionType": {
+        "type": "string",
+        "enum": [
+          "monthly",
+          "weekly",
+          "trial",
+          "custom"
+        ],
+        "title": "SubscriptionType"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
