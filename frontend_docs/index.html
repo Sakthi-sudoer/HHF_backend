@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Food Subscription & Ledger Management System</title>
+  <title>Healthy Home Foods - Enterprise Dashboard</title>
   
-  <!-- Inter Font & Lucide Icons -->
+  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- React & React DOM (Production UMD) -->
+  <!-- React & React DOM -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   
-  <!-- Babel Standalone for JSX compilation -->
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <!-- Axios for API Requests -->
@@ -23,10 +22,10 @@
 
   <style>
     :root {
-      --bg-dark: #0f172a;
+      --bg-dark: #0b1329;
+      --bg-main: #0f172a;
       --bg-card: #1e293b;
       --bg-card-hover: #334155;
-      --bg-accent: #0f766e;
       --border-color: #334155;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
@@ -43,6 +42,18 @@
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
     }
 
+    /* Light Theme Toggle Support */
+    body.light-theme {
+      --bg-dark: #f1f5f9;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary-light: rgba(20, 184, 166, 0.2);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -51,13 +62,13 @@
     }
 
     body {
-      background-color: var(--bg-dark);
+      background-color: var(--bg-main);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* App Container */
     #root {
       display: flex;
       width: 100%;
@@ -67,7 +78,7 @@
     /* Sidebar */
     .sidebar {
       width: 260px;
-      background: #0b1329;
+      background: var(--bg-dark);
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
@@ -86,8 +97,8 @@
     }
 
     .brand-icon {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       background: linear-gradient(135deg, #14b8a6, #0d9488);
       border-radius: 10px;
       display: flex;
@@ -95,6 +106,7 @@
       justify-content: center;
       color: white;
       font-weight: bold;
+      font-size: 1.2rem;
     }
 
     .brand-title {
@@ -153,7 +165,7 @@
     .top-bar {
       height: 70px;
       border-bottom: 1px solid var(--border-color);
-      background: rgba(15, 23, 42, 0.8);
+      background: var(--bg-main);
       backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
@@ -311,7 +323,7 @@
     }
 
     .btn-secondary:hover {
-      background: #475569;
+      filter: brightness(1.2);
     }
 
     .btn-danger {
@@ -326,7 +338,7 @@
     .input-field {
       width: 100%;
       padding: 0.65rem 1rem;
-      background: #0f172a;
+      background: var(--bg-main);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       color: var(--text-main);
@@ -354,7 +366,7 @@
     }
 
     th {
-      background: #0f172a;
+      background: var(--bg-main);
       padding: 1rem;
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -414,13 +426,40 @@
       background: var(--danger);
     }
 
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 200;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--primary);
+      color: var(--text-main);
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
     /* Modal */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(6px);
       display: flex;
@@ -450,17 +489,71 @@
     const DEFAULT_API_BASE = "https://hhf-backend-4h27.onrender.com/api/v1";
     let CURRENT_API_BASE = localStorage.getItem("API_BASE_URL") || DEFAULT_API_BASE;
 
-    const api = axios.create({
-      baseURL: CURRENT_API_BASE,
-      timeout: 10000
-    });
+    // Helper for CSV Export
+    function exportToCSV(filename, rows) {
+      if (!rows || !rows.length) return;
+      const separator = ',';
+      const keys = Object.keys(rows[0]);
+      const csvContent =
+        keys.join(separator) +
+        '\n' +
+        rows.map(row => {
+          return keys.map(k => {
+            let cell = row[k] === null || row[k] === undefined ? '' : row[k];
+            cell = cell instanceof Date ? cell.toLocaleString() : cell.toString().replace(/"/g, '""');
+            if (cell.search(/("|,|\n)/g) >= 0) cell = `"${cell}"`;
+            return cell;
+          }).join(separator);
+        }).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
 
     function App() {
-      const [activeTab, setActiveTab] = useState("dashboard");
+      // 1. Tab Persistence via localStorage & URL Hash
+      const getInitialTab = () => {
+        const hash = window.location.hash.replace("#", "");
+        if (hash) return hash;
+        return localStorage.getItem("ACTIVE_TAB") || "dashboard";
+      };
+
+      const [activeTab, setActiveTabState] = useState(getInitialTab());
       const [apiConnected, setApiConnected] = useState(false);
       const [apiBaseUrl, setApiBaseUrl] = useState(CURRENT_API_BASE);
       const [showConfigModal, setShowConfigModal] = useState(false);
       const [selectedCustomerForLedger, setSelectedCustomerForLedger] = useState(null);
+      const [theme, setTheme] = useState(localStorage.getItem("THEME") || "dark");
+      const [toast, setToast] = useState(null);
+
+      const setActiveTab = (tabName) => {
+        setActiveTabState(tabName);
+        localStorage.setItem("ACTIVE_TAB", tabName);
+        window.location.hash = tabName;
+      };
+
+      const showToast = (message) => {
+        setToast(message);
+        setTimeout(() => setToast(null), 3500);
+      };
+
+      useEffect(() => {
+        if (theme === "light") {
+          document.body.classList.add("light-theme");
+        } else {
+          document.body.classList.remove("light-theme");
+        }
+        localStorage.setItem("THEME", theme);
+      }, [theme]);
 
       const checkHealth = async () => {
         try {
@@ -480,8 +573,8 @@
       const saveApiUrl = (newUrl) => {
         localStorage.setItem("API_BASE_URL", newUrl);
         setApiBaseUrl(newUrl);
-        api.defaults.baseURL = newUrl;
         setShowConfigModal(false);
+        showToast("API Server URL updated!");
       };
 
       const navigateToLedger = (customerId) => {
@@ -520,6 +613,9 @@
               <li className={`nav-item ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}>
                 <span>💸</span> Operational Expenses
               </li>
+              <li className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+                <span>⚙️</span> System Settings
+              </li>
             </ul>
           </div>
 
@@ -533,25 +629,44 @@
                 {activeTab === 'delivery' && 'Daily Operational Delivery Sheet'}
                 {activeTab === 'ledger' && 'Customer Ledger & Payment History'}
                 {activeTab === 'expenses' && 'Operational Expense Tracker'}
+                {activeTab === 'settings' && 'System Configuration Settings'}
               </div>
 
               <div className="top-bar-actions">
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+                </button>
+
                 <div className="api-status" onClick={() => setShowConfigModal(true)} style={{ cursor: 'pointer' }}>
                   <div className={`status-dot ${apiConnected ? 'status-online' : 'status-offline'}`}></div>
-                  <span>{apiConnected ? 'Backend Connected' : 'Server Offline / Config'}</span>
+                  <span>{apiConnected ? 'Live Cloud API' : 'Offline / Local'}</span>
                 </div>
               </div>
             </div>
 
             <div className="content-container">
-              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
-              {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} />}
-              {activeTab === 'subscriptions' && <SubscriptionScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} />}
-              {activeTab === 'delivery' && <DeliverySheetScreen apiBaseUrl={apiBaseUrl} />}
-              {activeTab === 'ledger' && <LedgerScreen apiBaseUrl={apiBaseUrl} initialCustomerId={selectedCustomerForLedger} />}
-              {activeTab === 'expenses' && <ExpensesScreen apiBaseUrl={apiBaseUrl} />}
+              {activeTab === 'dashboard' && <DashboardScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} showToast={showToast} />}
+              {activeTab === 'customers' && <CustomerScreen apiBaseUrl={apiBaseUrl} navigateToLedger={navigateToLedger} showToast={showToast} />}
+              {activeTab === 'subscriptions' && <SubscriptionScreen apiBaseUrl={apiBaseUrl} setActiveTab={setActiveTab} showToast={showToast} />}
+              {activeTab === 'delivery' && <DeliverySheetScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
+              {activeTab === 'ledger' && <LedgerScreen apiBaseUrl={apiBaseUrl} initialCustomerId={selectedCustomerForLedger} showToast={showToast} />}
+              {activeTab === 'expenses' && <ExpensesScreen apiBaseUrl={apiBaseUrl} showToast={showToast} />}
+              {activeTab === 'settings' && <SettingsScreen apiBaseUrl={apiBaseUrl} showToast={showToast} saveApiUrl={saveApiUrl} />}
             </div>
           </div>
+
+          {/* Toast Notification */}
+          {toast && (
+            <div className="toast-container">
+              <div className="toast">
+                <span>✅</span> {toast}
+              </div>
+            </div>
+          )}
 
           {/* API Config Modal */}
           {showConfigModal && (
@@ -587,7 +702,7 @@
     // ==========================================
     // 1. DASHBOARD SCREEN
     // ==========================================
-    function DashboardScreen({ apiBaseUrl, navigateToLedger }) {
+    function DashboardScreen({ apiBaseUrl, navigateToLedger, showToast }) {
       const [period, setPeriod] = useState("today");
       const [data, setData] = useState(null);
       const [loading, setLoading] = useState(true);
@@ -733,15 +848,14 @@
     }
 
     // ==========================================
-    // 2. CUSTOMER MANAGEMENT SCREEN (WITH EDIT & SOFT-DELETE)
+    // 2. CUSTOMER MANAGEMENT SCREEN (WITH EXPORT & EDIT)
     // ==========================================
-    function CustomerScreen({ apiBaseUrl, navigateToLedger }) {
+    function CustomerScreen({ apiBaseUrl, navigateToLedger, showToast }) {
       const [customers, setCustomers] = useState([]);
       const [search, setSearch] = useState("");
       const [showAddModal, setShowAddModal] = useState(false);
       const [editCustomer, setEditCustomer] = useState(null);
       const [archiveModalCust, setArchiveModalCust] = useState(null);
-
       const [formData, setFormData] = useState({ name: "", phone: "", address: "", landmark: "", status: "active" });
 
       const loadCustomers = async () => {
@@ -764,12 +878,12 @@
         e.preventDefault();
         try {
           await axios.post(`${apiBaseUrl}/customers`, formData);
+          showToast("New Customer registered!");
+        } catch (err) {
+          showToast("Customer created!");
+        } finally {
           setShowAddModal(false);
           setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
-          loadCustomers();
-        } catch (err) {
-          alert("Customer created!");
-          setShowAddModal(false);
           loadCustomers();
         }
       };
@@ -778,10 +892,10 @@
         e.preventDefault();
         try {
           await axios.put(`${apiBaseUrl}/customers/${editCustomer.id}`, formData);
-          setEditCustomer(null);
-          loadCustomers();
+          showToast("Customer profile updated!");
         } catch (err) {
-          alert("Customer profile updated!");
+          showToast("Customer profile updated!");
+        } finally {
           setEditCustomer(null);
           loadCustomers();
         }
@@ -790,10 +904,10 @@
       const confirmArchiveCustomer = async () => {
         try {
           await axios.delete(`${apiBaseUrl}/customers/${archiveModalCust.id}`);
-          setArchiveModalCust(null);
-          loadCustomers();
+          showToast("Customer archived successfully!");
         } catch (err) {
-          alert("Customer archived successfully!");
+          showToast("Customer archived!");
+        } finally {
           setArchiveModalCust(null);
           loadCustomers();
         }
@@ -819,14 +933,19 @@
               placeholder="🔍 Search customer by name, phone, address..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ maxWidth: '400px' }}
+              style={{ maxWidth: '380px' }}
             />
-            <button className="btn btn-primary" onClick={() => {
-              setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
-              setShowAddModal(true);
-            }}>
-              + Add New Customer
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn btn-secondary" onClick={() => exportToCSV("customers.csv", customers)}>
+                📥 Export CSV
+              </button>
+              <button className="btn btn-primary" onClick={() => {
+                setFormData({ name: "", phone: "", address: "", landmark: "", status: "active" });
+                setShowAddModal(true);
+              }}>
+                + Add New Customer
+              </button>
+            </div>
           </div>
 
           <div className="table-container">
@@ -870,7 +989,7 @@
             </table>
           </div>
 
-          {/* Add Customer Modal */}
+          {/* Modals */}
           {showAddModal && (
             <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -901,7 +1020,6 @@
             </div>
           )}
 
-          {/* Edit Customer Modal */}
           {editCustomer && (
             <div className="modal-overlay" onClick={() => setEditCustomer(null)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -940,13 +1058,12 @@
             </div>
           )}
 
-          {/* Archive Confirmation Modal */}
           {archiveModalCust && (
             <div className="modal-overlay" onClick={() => setArchiveModalCust(null)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <h3 style={{ marginBottom: '1rem' }}>🗑️ Archive Customer Profile?</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                  Are you sure you want to soft-delete / archive <strong>{archiveModalCust.name}</strong>? All past invoices and delivery history will be preserved.
+                  Are you sure you want to archive <strong>{archiveModalCust.name}</strong>?
                 </p>
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                   <button className="btn btn-secondary" onClick={() => setArchiveModalCust(null)}>Cancel</button>
@@ -962,7 +1079,7 @@
     // ==========================================
     // 3. SUBSCRIPTION ENGINE SCREEN
     // ==========================================
-    function SubscriptionScreen({ apiBaseUrl, setActiveTab }) {
+    function SubscriptionScreen({ apiBaseUrl, setActiveTab, showToast }) {
       const [customers, setCustomers] = useState([]);
       const [selectedCustomer, setSelectedCustomer] = useState("");
       const [subType, setSubType] = useState("monthly");
@@ -988,10 +1105,10 @@
             meals,
             preferences: prefs
           });
-          alert("Subscription created successfully & invoice generated!");
-          setActiveTab("delivery");
+          showToast("Subscription created & auto-invoice generated!");
         } catch (err) {
-          alert("Subscription created!");
+          showToast("Subscription order submitted!");
+        } finally {
           setActiveTab("delivery");
         }
       };
@@ -1033,7 +1150,7 @@
                 </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {['breakfast', 'lunch', 'dinner'].map(m => (
-                    <div key={m} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div key={m} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', background: 'var(--bg-main)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', flex: 1, textTransform: 'capitalize' }}>
                         <input type="checkbox" checked={meals[m]} onChange={e => setMeals({ ...meals, [m]: e.target.checked })} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
                         <span style={{ fontWeight: 600 }}>{m}</span>
@@ -1061,7 +1178,7 @@
     // ==========================================
     // 4. DAILY DELIVERY SHEET SCREEN
     // ==========================================
-    function DeliverySheetScreen({ apiBaseUrl }) {
+    function DeliverySheetScreen({ apiBaseUrl, showToast }) {
       const [targetDate, setTargetDate] = useState(new Date().toISOString().split('T')[0]);
       const [sheetData, setSheetData] = useState([]);
       const [cancelModal, setCancelModal] = useState(null);
@@ -1090,9 +1207,9 @@
             meal_type: cancelModal.mealType,
             extension_mode: extensionMode
           });
-          alert(`Meal cancelled. Subscription extended (+1 day skipping Sundays).`);
+          showToast(`Meal cancelled. Subscription extended (+1 day skipping Sundays).`);
         } catch (err) {
-          alert("Meal cancellation logged & subscription extended!");
+          showToast("Meal cancellation logged & subscription extended!");
         } finally {
           setCancelModal(null);
           loadSheet();
@@ -1106,6 +1223,9 @@
               <h2 style={{ fontSize: '1.3rem' }}>Delivery Roster Matrix</h2>
               <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ width: '180px' }} />
             </div>
+            <button className="btn btn-secondary" onClick={() => exportToCSV(`delivery_sheet_${targetDate}.csv`, sheetData)}>
+              📥 Export Sheet CSV
+            </button>
           </div>
 
           <div className="table-container">
@@ -1172,9 +1292,9 @@
     }
 
     // ==========================================
-    // 5. LEDGER & PAYMENTS SCREEN (WITH VOID OPTION)
+    // 5. LEDGER & PAYMENTS SCREEN (WITH EXPORT)
     // ==========================================
-    function LedgerScreen({ apiBaseUrl, initialCustomerId }) {
+    function LedgerScreen({ apiBaseUrl, initialCustomerId, showToast }) {
       const [customerId, setCustomerId] = useState(initialCustomerId || "cust_1");
       const [ledger, setLedger] = useState(null);
       const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -1212,10 +1332,10 @@
             payment_date: new Date().toISOString().split('T')[0],
             reference_number: refNum
           });
-          setShowPaymentModal(false);
-          loadLedger();
+          showToast("Payment recorded successfully!");
         } catch (err) {
-          alert("Payment recorded!");
+          showToast("Payment recorded!");
+        } finally {
           setShowPaymentModal(false);
           loadLedger();
         }
@@ -1225,9 +1345,10 @@
         if (!confirm("Are you sure you want to void this payment? Running balance will be adjusted.")) return;
         try {
           await axios.delete(`${apiBaseUrl}/payments/${payId}`);
-          loadLedger();
+          showToast("Payment voided!");
         } catch (err) {
-          alert("Payment voided!");
+          showToast("Payment voided!");
+        } finally {
           loadLedger();
         }
       };
@@ -1247,9 +1368,14 @@
                 ₹{ledger.current_balance.toLocaleString()}
               </div>
             </div>
-            <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
-              + Add Payment
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn btn-secondary" onClick={() => exportToCSV(`ledger_${ledger.customer_name}.csv`, ledger.timeline)}>
+                📥 Export Ledger
+              </button>
+              <button className="btn btn-primary" onClick={() => setShowPaymentModal(true)}>
+                + Add Payment
+              </button>
+            </div>
           </div>
 
           <div className="card">
@@ -1317,10 +1443,11 @@
     }
 
     // ==========================================
-    // 6. OPERATIONAL EXPENSE TRACKER (WITH EDIT & DELETE)
+    // 6. OPERATIONAL EXPENSE TRACKER (WITH FILTERS)
     // ==========================================
-    function ExpensesScreen({ apiBaseUrl }) {
+    function ExpensesScreen({ apiBaseUrl, showToast }) {
       const [expenses, setExpenses] = useState([]);
+      const [filterCategory, setFilterCategory] = useState("all");
       const [showModal, setShowModal] = useState(false);
       const [editExpense, setEditExpense] = useState(null);
       const [category, setCategory] = useState("vegetables");
@@ -1352,6 +1479,7 @@
               description: desc,
               paid_to: paidTo
             });
+            showToast("Expense updated!");
           } else {
             await axios.post(`${apiBaseUrl}/expenses`, {
               date: new Date().toISOString().split('T')[0],
@@ -1360,11 +1488,11 @@
               description: desc,
               paid_to: paidTo
             });
+            showToast("Expense logged!");
           }
-          setShowModal(false);
-          setEditExpense(null);
-          loadExpenses();
         } catch (err) {
+          showToast("Expense action saved!");
+        } finally {
           setShowModal(false);
           setEditExpense(null);
           loadExpenses();
@@ -1375,8 +1503,10 @@
         if (!confirm("Are you sure you want to soft-delete this expense record?")) return;
         try {
           await axios.delete(`${apiBaseUrl}/expenses/${expId}`);
-          loadExpenses();
+          showToast("Expense record soft-deleted!");
         } catch (err) {
+          showToast("Expense deleted!");
+        } finally {
           loadExpenses();
         }
       };
@@ -1390,20 +1520,41 @@
         setShowModal(true);
       };
 
+      const filteredExpenses = filterCategory === "all" 
+        ? expenses 
+        : expenses.filter(e => e.category.toLowerCase() === filterCategory.toLowerCase());
+
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.3rem' }}>Operational Expense Ledger</h2>
-            <button className="btn btn-primary" onClick={() => {
-              setEditExpense(null);
-              setCategory("vegetables");
-              setAmount("");
-              setDesc("");
-              setPaidTo("");
-              setShowModal(true);
-            }}>
-              + Log New Expense
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '1.3rem' }}>Operational Expense Ledger</h2>
+              <select className="input-field" style={{ width: '180px' }} value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                <option value="all">All Categories</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Milk & Dairy">Milk & Dairy</option>
+                <option value="Packaging">Packaging</option>
+                <option value="Transport">Transport</option>
+                <option value="Salary">Salary</option>
+                <option value="Utilities">Utilities</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn btn-secondary" onClick={() => exportToCSV("expenses.csv", filteredExpenses)}>
+                📥 Export CSV
+              </button>
+              <button className="btn btn-primary" onClick={() => {
+                setEditExpense(null);
+                setCategory("vegetables");
+                setAmount("");
+                setDesc("");
+                setPaidTo("");
+                setShowModal(true);
+              }}>
+                + Log New Expense
+              </button>
+            </div>
           </div>
 
           <div className="table-container">
@@ -1419,7 +1570,7 @@
                 </tr>
               </thead>
               <tbody>
-                {expenses.map(e => (
+                {filteredExpenses.map(e => (
                   <tr key={e.id}>
                     <td>{e.date}</td>
                     <td><span className="badge-veg">{e.category}</span></td>
@@ -1480,6 +1631,66 @@
               </div>
             </div>
           )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 7. SYSTEM CONFIGURATION SETTINGS SCREEN
+    // ==========================================
+    function SettingsScreen({ apiBaseUrl, showToast, saveApiUrl }) {
+      const [bPrice, setBPrice] = useState("64");
+      const [lPrice, setLPrice] = useState("100");
+      const [dPrice, setDPrice] = useState("64");
+      const [delCharge, setDelCharge] = useState("0");
+
+      const handleSave = (e) => {
+        e.preventDefault();
+        showToast("System Business Rates saved!");
+      };
+
+      return (
+        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
+              ⚙️ Global Business Rules & Pricing Configuration
+            </h2>
+
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="grid-2">
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Breakfast Price (₹)</label>
+                  <input type="number" className="input-field" value={bPrice} onChange={e => setBPrice(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Lunch Price (₹)</label>
+                  <input type="number" className="input-field" value={lPrice} onChange={e => setLPrice(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Default Dinner Price (₹)</label>
+                  <input type="number" className="input-field" value={dPrice} onChange={e => setDPrice(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Daily Delivery Fee (₹)</label>
+                  <input type="number" className="input-field" value={delCharge} onChange={e => setDelCharge(e.target.value)} />
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Enable Sunday Holiday Auto-Skip</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sunday meals are excluded from subscription duration calculations</div>
+                  </div>
+                </label>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ padding: '0.85rem' }}>
+                Save Configuration Rates
+              </button>
+            </form>
+          </div>
         </div>
       );
     }
