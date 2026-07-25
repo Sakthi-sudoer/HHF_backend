@@ -1,195 +1,416 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Customer Registry Book - Healthy Home Foods</title>
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0fdf4',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-            },
-            tealbrand: {
-              400: '#2dd4bf',
-              500: '#14b8a6',
-              600: '#0d9488',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Axios for API Calls -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Registry Book & Food Subscription Management System</title>
+  
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Axios -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-teal-500 selection:text-slate-900">
+<body>
 
-  <!-- Main App Shell -->
-  <div id="app" class="flex w-full min-h-screen">
-    
-    <!-- Sidebar Navigation (Desktop) -->
-    <aside class="hidden md:flex flex-col w-64 bg-slate-950 border-r border-slate-800 p-4 fixed h-full z-20">
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-3 px-3 py-3 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-teal-500/20">
-          🍱
-        </div>
+  <div class="app-container">
+
+    <!-- 🌟 LEFT NAVIGATION SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon"><i class="fas fa-utensils"></i></div>
         <div>
-          <h1 class="font-bold text-base text-slate-100 leading-tight">Healthy Home Foods</h1>
-          <p class="text-xs text-teal-400 font-medium">Customer Registry Book</p>
+          <h1 class="brand-title">Customer Registry</h1>
+          <p class="brand-subtitle">Healthy Home's Foods ERP</p>
         </div>
       </div>
 
-      <!-- Navigation Links -->
-      <nav class="flex-1 space-y-1 overflow-y-auto">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-chart-pie text-base w-5 text-center"></i>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <i class="fas fa-chart-pie"></i>
           <span>Dashboard</span>
-        </button>
-        <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-users text-base w-5 text-center"></i>
-          <span>Customer CRM</span>
-        </button>
-        <button onclick="switchTab('subscriptions')" id="nav-subscriptions" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-calendar-plus text-base w-5 text-center"></i>
-          <span>New Subscription</span>
-        </button>
-        <button onclick="switchTab('delivery')" id="nav-delivery" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-truck-ram-box text-base w-5 text-center"></i>
+        </a>
+        <a class="nav-item" data-tab="customers" onclick="switchTab('customers')">
+          <i class="fas fa-address-book"></i>
+          <span>Customer Registry</span>
+        </a>
+        <a class="nav-item" data-tab="subscriptions" onclick="switchTab('subscriptions')">
+          <i class="fas fa-calendar-check"></i>
+          <span>Subscriptions</span>
+        </a>
+        <a class="nav-item" data-tab="deliveries" onclick="switchTab('deliveries')">
+          <i class="fas fa-truck-ram-box"></i>
           <span>Daily Deliveries</span>
-        </button>
-        <button onclick="switchTab('ledger')" id="nav-ledger" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
-          <span>Ledger & Payments</span>
-        </button>
-        <button onclick="switchTab('expenses')" id="nav-expenses" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-receipt text-base w-5 text-center"></i>
+        </a>
+        <a class="nav-item" data-tab="payments" onclick="switchTab('payments')">
+          <i class="fas fa-receipt"></i>
+          <span>Payments & Ledger</span>
+        </a>
+        <a class="nav-item" data-tab="expenses" onclick="switchTab('expenses')">
+          <i class="fas fa-hand-holding-dollar"></i>
           <span>Expenses</span>
-        </button>
-        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-boxes-stacked text-base w-5 text-center"></i>
-          <span>Stock & Inventory</span>
-        </button>
-        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition">
-          <i class="fa-solid fa-sliders text-base w-5 text-center"></i>
+        </a>
+        <a class="nav-item" data-tab="inventory" onclick="switchTab('inventory')">
+          <i class="fas fa-boxes-stacked"></i>
+          <span>Inventory</span>
+        </a>
+        <a class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+          <i class="fas fa-sliders"></i>
           <span>Settings</span>
-        </button>
+        </a>
       </nav>
-
-      <!-- Connection Status Card -->
-      <div class="mt-auto pt-4 border-t border-slate-800">
-        <div onclick="openConfigModal()" class="p-3 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition flex items-center gap-3">
-          <div id="status-indicator" class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50"></div>
-          <div>
-            <p id="status-title" class="text-xs font-semibold text-slate-200">Cloud API Live</p>
-            <p id="status-url" class="text-[10px] text-slate-400 truncate max-w-[140px]">onrender.com</p>
-          </div>
-        </div>
-      </div>
     </aside>
 
-    <!-- Mobile Bottom Navigation Bar -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950 border-t border-slate-800 z-30 flex items-center justify-around px-2">
-      <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
-        <i class="fa-solid fa-chart-pie text-lg"></i>
-        <span>Home</span>
-      </button>
-      <button onclick="switchTab('customers')" id="mobile-nav-customers" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
-        <i class="fa-solid fa-users text-lg"></i>
-        <span>CRM</span>
-      </button>
-      <button onclick="switchTab('delivery')" id="mobile-nav-delivery" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
-        <i class="fa-solid fa-truck text-lg"></i>
-        <span>Delivery</span>
-      </button>
-      <button onclick="switchTab('ledger')" id="mobile-nav-ledger" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
-        <i class="fa-solid fa-wallet text-lg"></i>
-        <span>Ledger</span>
-      </button>
-      <button onclick="switchTab('expenses')" id="mobile-nav-expenses" class="mobile-nav flex flex-col items-center gap-1 text-slate-400 text-xs font-medium">
-        <i class="fa-solid fa-receipt text-lg"></i>
-        <span>Expenses</span>
-      </button>
-    </div>
-
-    <!-- Main Content Workspace -->
-    <main class="flex-1 md:ml-64 pb-20 md:pb-8 min-w-0">
+    <!-- 🌟 MAIN CONTENT AREA -->
+    <main class="main-wrapper">
       
-      <!-- Top Header Bar -->
-      <header class="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h2 id="page-title" class="text-xl font-bold text-slate-100">Dashboard Overview</h2>
-          <p id="page-subtitle" class="text-xs text-slate-400">Live operational & financial metrics</p>
+      <!-- TOP HEADER BAR -->
+      <header class="top-bar">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <button class="btn btn-secondary btn-sm md:hidden" id="mobile-menu-btn" onclick="toggleMobileSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          
+          <!-- GLOBAL SEARCH BOX -->
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="global-search-input" oninput="handleGlobalSearch()" placeholder="Search phone, ID, name, address...">
+          </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-slate-100 flex items-center justify-center text-sm transition">
-            <i class="fa-solid fa-moon"></i>
+        <div class="top-actions">
+          <!-- Quick Action Buttons -->
+          <button class="btn btn-primary btn-sm" id="quick-add-cust-btn" onclick="openAddCustomerModal()">
+            <i class="fas fa-user-plus"></i> Add Customer
           </button>
-          <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-teal-400 hover:bg-slate-700 transition">
-            <i class="fa-solid fa-wifi mr-1"></i> API Server
+          <button class="btn btn-secondary btn-sm" id="quick-record-pmt-btn" onclick="openPaymentModal()">
+            <i class="fas fa-plus-circle"></i> Record Payment
+          </button>
+          <button class="btn btn-secondary btn-sm" id="server-config-btn" onclick="openConfigModal()">
+            <i class="fas fa-wifi"></i> API Server
           </button>
         </div>
       </header>
 
-      <!-- Dynamic Views Container -->
-      <div class="p-6">
-        <div id="view-container"></div>
+      <!-- PAGE VIEWS CONTAINER -->
+      <div id="page-content-container">
+
+        <!-- 1. DASHBOARD VIEW -->
+        <section class="page-view active" id="view-dashboard">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Executive ERP Dashboard</h2>
+              <p class="page-subtitle">Real-time daily catering operations & financial health overview</p>
+            </div>
+          </div>
+          
+          <div id="dashboard-metrics-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- 2. CUSTOMER REGISTRY BOOK VIEW -->
+        <section class="page-view" id="view-customers">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Customer Registry Book</h2>
+              <p class="page-subtitle">Manage customer profiles, preferences, container deposits & history</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">
+              <i class="fas fa-plus"></i> Add New Customer
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div class="data-card-header">
+              <input type="text" class="form-control" id="customer-filter-search" oninput="loadCustomerData()" placeholder="Filter customers..." style="width:260px;">
+              <button class="btn btn-secondary btn-sm" onclick="exportCSV('customers')">
+                <i class="fas fa-download"></i> Export CSV
+              </button>
+            </div>
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Phone / WhatsApp</th>
+                    <th>Delivery Address</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. SUBSCRIPTIONS VIEW -->
+        <section class="page-view" id="view-subscriptions">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Subscription Manager</h2>
+              <p class="page-subtitle">Manage active meal plans, delivery calendars & automatic renewals</p>
+            </div>
+          </div>
+
+          <div class="data-card" style="max-width: 680px; margin: 0 auto;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; color: var(--primary);">Create Customer Subscription</h3>
+            <form onsubmit="handleCreateSubscriptionSubmit(event)" style="display:flex; flex-direction:column; gap:1rem;">
+              <div>
+                <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Select Customer</label>
+                <select id="sub-cust-select" required class="form-control">
+                  <!-- Options injected -->
+                </select>
+              </div>
+
+              <div class="grid-2">
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Subscription Plan</label>
+                  <select id="sub-type" class="form-control">
+                    <option value="monthly">Monthly (26 Working Days - Skip Sundays)</option>
+                    <option value="weekly">Weekly (6 Days)</option>
+                    <option value="trial">Trial (Custom Days)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Start Date</label>
+                  <input type="date" id="sub-start-date" required class="form-control">
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+                <label class="page-subtitle" style="font-weight:600;">Meal Selection & Preferences</label>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-dark); padding:0.75rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" id="meal-b" checked style="accent-color:var(--primary);">
+                    <span>Breakfast</span>
+                  </label>
+                  <select id="pref-b" class="form-control" style="width:130px; padding:0.3rem 0.5rem;">
+                    <option value="veg">🟢 Veg</option>
+                    <option value="non_veg">🔴 Non-Veg</option>
+                  </select>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-dark); padding:0.75rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" id="meal-l" checked style="accent-color:var(--primary);">
+                    <span>Lunch</span>
+                  </label>
+                  <select id="pref-l" class="form-control" style="width:130px; padding:0.3rem 0.5rem;">
+                    <option value="non_veg">🔴 Non-Veg</option>
+                    <option value="veg">🟢 Veg</option>
+                  </select>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-dark); padding:0.75rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                    <input type="checkbox" id="meal-d" checked style="accent-color:var(--primary);">
+                    <span>Dinner</span>
+                  </label>
+                  <select id="pref-d" class="form-control" style="width:130px; padding:0.3rem 0.5rem;">
+                    <option value="veg">🟢 Veg</option>
+                    <option value="non_veg">🔴 Non-Veg</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top:0.5rem; padding:0.85rem;">
+                🚀 Create Subscription Plan & Auto-Invoice
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- 4. DAILY DELIVERIES VIEW -->
+        <section class="page-view" id="view-deliveries">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Daily Delivery Sheet & Leave Extensions</h2>
+              <p class="page-subtitle">Track daily meal delivery matrix, cancellations & automated working day extensions</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <input type="date" class="form-control" id="delivery-date-picker" onchange="loadDeliverySheet()" style="width:180px;">
+              <button class="btn btn-secondary btn-sm" onclick="exportCSV('delivery')">
+                <i class="fas fa-download"></i> Export Sheet
+              </button>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Breakfast</th>
+                    <th>Lunch</th>
+                    <th>Dinner</th>
+                  </tr>
+                </thead>
+                <tbody id="deliveries-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. PAYMENTS & LEDGER VIEW -->
+        <section class="page-view" id="view-payments">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Payment Ledger & Customer History</h2>
+              <p class="page-subtitle">Double-entry transaction records, payments & running balance</p>
+            </div>
+            <button class="btn btn-primary" onclick="openPaymentModal()">
+              <i class="fas fa-plus-circle"></i> Record Payment Entry
+            </button>
+          </div>
+
+          <div class="grid-3" style="margin-bottom:1.5rem;">
+            <div class="data-card">
+              <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Select Customer</label>
+              <select class="form-control" id="ledger-cust-select" onchange="loadCustomerLedger()">
+                <!-- Injected via JS -->
+              </select>
+            </div>
+            <div class="data-card" style="text-align:right;">
+              <span class="page-subtitle">Current Outstanding Balance</span>
+              <h3 id="ledger-balance" style="font-size:1.8rem; color:var(--danger); margin-top:0.2rem;">₹0.00</h3>
+            </div>
+            <div class="data-card" style="display:flex; align-items:center; justify-content:flex-end; gap:0.75rem;">
+              <button class="btn btn-secondary" onclick="openInvoicePreviewModal()">
+                <i class="fas fa-file-invoice"></i> Preview Invoice
+              </button>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <h3 style="font-size:1.1rem; margin-bottom:1.25rem; color:var(--primary);">Transaction History Timeline</h3>
+            <div id="ledger-timeline" style="display:flex; flex-direction:column; gap:1rem;">
+              <!-- Timeline cards injected -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. EXPENSES VIEW -->
+        <section class="page-view" id="view-expenses">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Expense Manager</h2>
+              <p class="page-subtitle">Track operational expenditures: groceries, milk, vegetables, packaging & salaries</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddExpenseModal()">
+              <i class="fas fa-plus"></i> Log Expense
+            </button>
+          </div>
+
+          <div class="data-card">
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Paid To</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. INVENTORY VIEW -->
+        <section class="page-view" id="view-inventory">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Inventory & Kitchen Stock Tracker</h2>
+              <p class="page-subtitle">Monitor ingredients, rice, dal, oil, chicken & packaging containers</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddInventoryModal()">
+              <i class="fas fa-plus"></i> Add Stock Item
+            </button>
+          </div>
+
+          <div class="grid-3" id="inventory-grid">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- 8. SETTINGS VIEW -->
+        <section class="page-view" id="view-settings">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Global Settings & Configuration</h2>
+              <p class="page-subtitle">Configure business meal prices, delivery charges & server settings</p>
+            </div>
+          </div>
+
+          <div class="data-card" style="max-width:640px; margin:0 auto;">
+            <h3 style="font-size:1.1rem; margin-bottom:1.25rem; color:var(--primary);">Dynamic Pricing Engine</h3>
+            <form onsubmit="handleSaveSettingsSubmit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+              <div class="grid-2">
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Default Breakfast Price (₹)</label>
+                  <input type="number" class="form-control" id="cfg-b-in" value="64">
+                </div>
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Default Lunch Price (₹)</label>
+                  <input type="number" class="form-control" id="cfg-l-in" value="100">
+                </div>
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Default Dinner Price (₹)</label>
+                  <input type="number" class="form-control" id="cfg-d-in" value="64">
+                </div>
+                <div>
+                  <label class="page-subtitle" style="display:block; margin-bottom:0.35rem;">Delivery Charge > 8km (₹)</label>
+                  <input type="number" class="form-control" id="cfg-del-in" value="0">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Save Configuration Rates</button>
+            </form>
+          </div>
+        </section>
+
       </div>
     </main>
 
   </div>
 
-  <!-- Toast Element -->
-  <div id="toast" class="fixed bottom-20 md:bottom-6 right-6 z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none bg-slate-800 border border-teal-500 text-slate-100 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-    <i class="fa-solid fa-circle-check text-teal-400 text-lg"></i>
-    <span id="toast-text" class="text-sm font-medium">Notification message</span>
-  </div>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
 
-  <!-- Global Modal Dialog Container -->
-  <div id="modal-container" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div id="modal-content" class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 custom-shadow relative max-h-[90vh] overflow-y-auto">
-      <!-- Modal Form content injected via JS -->
+  <!-- Global Modal Dialog Overlay -->
+  <div class="modal-overlay" id="modal-overlay" style="display:none;" onclick="closeModal()">
+    <div class="modal-content" id="modal-content" onclick="event.stopPropagation()">
+      <!-- Injected dynamically -->
     </div>
   </div>
 
-  <!-- Application Modular Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/components/dashboard.js"></script>
-  <script src="js/components/customers.js"></script>
-  <script src="js/components/subscriptions.js"></script>
-  <script src="js/components/deliveries.js"></script>
-  <script src="js/components/ledger.js"></script>
-  <script src="js/components/expenses.js"></script>
-  <script src="js/components/inventory.js"></script>
-  <script src="js/components/settings.js"></script>
+  <!-- JavaScript Modules -->
+  <script src="js/core/config.js"></script>
+  <script src="js/core/api.js"></script>
+  <script src="js/dashboard/dashboard-render.js"></script>
+  <script src="js/customers/customer-manager.js"></script>
+  <script src="js/subscriptions/subscription-manager.js"></script>
+  <script src="js/deliveries/delivery-manager.js"></script>
+  <script src="js/finance/ledger-manager.js"></script>
+  <script src="js/expenses/expense-manager.js"></script>
+  <script src="js/inventory/inventory-manager.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
